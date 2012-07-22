@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="liblouis-java" default="jar">
+
+    <description>Java bindings for liblouis</description>
+
+    <property name="project.name" value="liblouis-java" />
+    <property name="project.version" value="0.0.1" />
+    <property name="dist.jar" value="${project.name}-${project.version}.jar" />
+    <property name="jna.jar" value="jna-3.4.1.jar" />
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="bin"/>
+    <property name="lib.dir" value="lib"/>
+
+    <tstamp><format property="ISO-TODAY" pattern="yyyy-MM-dd"/></tstamp>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <delete file="${dist.jar}"/>
+    </target>
+
+    <target name="compile" description="Compile">
+        <mkdir dir="${build.dir}"/>
+        <depend srcdir="${src.dir}" destdir="${build.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false"
+            debug="true" encoding="UTF-8" source="1.6" target="1.6"
+            classpath="${lib.dir}/${jna.jar}"/>
+    </target>
+
+    <target name="jar" description="Build jar" depends="compile">
+        <delete file="${dist.jar}"/>
+        <jar destfile="${dist.jar}">
+            <fileset dir="${build.dir}"/>
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Built-On" value="${ISO-TODAY}"/>
+                <attribute name="Implementation-Title" value="${project.title}"/>
+                <attribute name="Class-Path" value="${jna.jar}"/>
+                <attribute name="Main-Class" value="org.liblouis.Translator"/>
+            </manifest>
+        </jar>
+    </target>
+
+</project>
