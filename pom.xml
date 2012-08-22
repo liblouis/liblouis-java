@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.liblouis</groupId>
+  <artifactId>liblouis-java</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>liblouis-java</name>
+  <description>JNA based Java bindings to liblouis, an open-source braille translator and back-translator.</description>
+  <url>https://github.com/bertfrees/liblouis-java</url>
+
+  <scm>
+    <connection>scm:git:https://github.com/bertfrees/liblouis-java.git</connection>
+  </scm>
+
+  <licenses>
+    <license>
+      <name>GNU General Public License 3</name>
+      <url>http://www.gnu.org/copyleft/gpl.html</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Bert Frees</name>
+      <email>bertfrees@gmail.com</email>
+      <url>http://github.com/bertfrees</url>
+      <organization>SBS - Schweizerische Bibliothek für Blinde, Seh- und Lesebehinderte</organization>
+      <organizationUrl>http://www.sbs.ch</organizationUrl>
+    </developer>
+  </developers>
+
+  <dependencies>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>3.2.3</version>
+    </dependency>
+  </dependencies>
+
+</project>
