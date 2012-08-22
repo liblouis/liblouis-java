@@ -18,4 +18,6 @@ public interface LouisLibrary extends Library {
 			final int[] outputPos, final int[] inputPos, final IntByReference cursorPos, final int mode);
 	
 	public int lou_charSize();
+
+	public int lou_free();
 }
