@@ -28,14 +28,14 @@ License
 Copyright 2012 [Bert Frees][bert]
 
 This program is free software: you can redistribute it and/or modify
-    it under the terms of the [GNU Lesser General Public License][lgpl]
-    as published by the Free Software Foundation, either version 3 of
-    the License, or (at your option) any later version.
+it under the terms of the [GNU Lesser General Public License][lgpl]
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
 
 [liblouis-java]: http://github.com/bertfrees/liblouis-java
 [liblouis]: http://code.google.com/p/liblouis/
