@@ -38,4 +38,8 @@ public class Translator {
 		
 		return new TranslationResult(OUTPUT_BUFFER, outLen);
 	}
+	
+	public static String version() {
+		return LIBLOUIS.lou_version();
+	}
 }
