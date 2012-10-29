@@ -16,6 +16,13 @@ public class Translator {
 	}
 
 	public TranslationResult translate(String text) throws Exception {
+		return translate(text, null);
+	}
+	
+	public TranslationResult translate(String text, byte[] typeform) throws Exception {
+		
+		if (typeform != null && typeform.length != text.length())
+			throw new RuntimeException("Arguments typeform and text must have the same lengths.");
 		
 		try {
 			INPUT_BUFFER.write(text);
@@ -28,7 +35,7 @@ public class Translator {
 		while (true) {
 			outLen.setValue(OUTPUT_BUFFER.length());
 			if (LIBLOUIS.lou_translate(tables, INPUT_BUFFER, inLen, OUTPUT_BUFFER, outLen,
-					null, null, null, null, null, 0) == 0) {
+					typeform, null, null, null, null, 0) == 0) {
 				throw new RuntimeException("Unable to complete translation");
 			}
 			boolean outputBufferFull = (outLen.getValue() >= OUTPUT_BUFFER.length());
