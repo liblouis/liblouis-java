@@ -6,8 +6,15 @@ public class Translator {
 
 	private static final LouisLibrary LIBLOUIS = LouisLibrary.INSTANCE;
 
+	/*
+	 * Number by which the input length should be multiplied to calculate
+	 * the maximum output length. This default will handle the case where
+	 * every input character is undefined in the translation table.
+	 */
+	private static final int outlenMultiplier = WideChar.Constants.CHARSIZE * 2 + 4;
+	
 	private static WideString INPUT_BUFFER = new WideString(512);
-	private static WideString OUTPUT_BUFFER = new WideString(1024);
+	private static WideString OUTPUT_BUFFER = new WideString(INPUT_BUFFER.length() * outlenMultiplier);
 	
 	private final String tables;
 	
@@ -28,19 +35,16 @@ public class Translator {
 			INPUT_BUFFER.write(text);
 		} catch (IllegalArgumentException e) {
 			INPUT_BUFFER = new WideString(text);
+			OUTPUT_BUFFER = new WideString(INPUT_BUFFER.length() * outlenMultiplier);
 		}
+		
 		final IntByReference inLen = new IntByReference(text.length());
 		final IntByReference outLen = new IntByReference();
 		
-		while (true) {
-			outLen.setValue(OUTPUT_BUFFER.length());
-			if (LIBLOUIS.lou_translate(tables, INPUT_BUFFER, inLen, OUTPUT_BUFFER, outLen,
-					typeform, null, null, null, null, 0) == 0) {
-				throw new RuntimeException("Unable to complete translation");
-			}
-			boolean outputBufferFull = (outLen.getValue() >= OUTPUT_BUFFER.length());
-			if (!outputBufferFull) { break; }
-			OUTPUT_BUFFER = new WideString(2 * OUTPUT_BUFFER.length());
+		outLen.setValue(OUTPUT_BUFFER.length());
+		if (LIBLOUIS.lou_translate(tables, INPUT_BUFFER, inLen, OUTPUT_BUFFER, outLen,
+				typeform, null, null, null, null, 0) == 0) {
+			throw new RuntimeException("Unable to complete translation");
 		}
 		
 		return new TranslationResult(OUTPUT_BUFFER, outLen);
