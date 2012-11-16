@@ -4,8 +4,6 @@ import com.sun.jna.ptr.IntByReference;
 
 public class Translator {
 
-	private static final LouisLibrary LIBLOUIS = LouisLibrary.INSTANCE;
-
 	/*
 	 * Number by which the input length should be multiplied to calculate
 	 * the maximum output length. This default will handle the case where
@@ -42,15 +40,11 @@ public class Translator {
 		final IntByReference outLen = new IntByReference();
 		
 		outLen.setValue(OUTPUT_BUFFER.length());
-		if (LIBLOUIS.lou_translate(tables, INPUT_BUFFER, inLen, OUTPUT_BUFFER, outLen,
+		if (Louis.getLibrary().lou_translate(tables, INPUT_BUFFER, inLen, OUTPUT_BUFFER, outLen,
 				typeform, null, null, null, null, 0) == 0) {
 			throw new RuntimeException("Unable to complete translation");
 		}
 		
 		return new TranslationResult(OUTPUT_BUFFER, outLen);
-	}
-	
-	public static String version() {
-		return LIBLOUIS.lou_version();
 	}
 }
