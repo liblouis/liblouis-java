@@ -7,13 +7,6 @@ The bindings are based on [JNA][].
 Building
 --------
 
-### Ant
-
- * `ant clean` will remove generated files
- * `ant jar` will build the JAR
-
-### Maven
-
  * `mvn clean` will remove generated files
  * `mvn package` will build the JAR
 
