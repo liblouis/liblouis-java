@@ -1,6 +1,12 @@
 package org.liblouis;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.liblouis.Louis.LouisLibrary;
 
 import com.sun.jna.ptr.IntByReference;
 
@@ -22,26 +28,22 @@ public class Translator {
 	 */
 	public TranslationResult translate(String text, byte[] typeform, boolean[] hyphens, boolean hyphenate) {
 		
-		Pair<WideString> buffers = getBuffers(text.length());
-		WideString inbuf = buffers._1;
-		WideString outbuf = buffers._2;
+		WideString inbuf = getBuffer("in", text.length()).write(text);
+		WideString outbuf = getBuffer("out", text.length() * OUTLEN_MULTIPLIER);
 		IntByReference inlen = new IntByReference(text.length());
 		IntByReference outlen = new IntByReference(outbuf.length());
-		inbuf.write(text);
 		
 		byte[] inputHyphens = null;
 		byte[] outputHyphens = null;
 		
-		if (hyphenate && hyphens == null)
-			hyphens = hyphenate(inbuf, text.length());
-		
-		if (hyphens != null) {
-			if (hyphens.length != text.length() - 1)
-				throw new RuntimeException("hyphens must be equal to text length minus 1.");
-			Pair<byte[]> hyphenBuffers = getHyphenBuffers(text.length());
-			inputHyphens = hyphenBuffers._1;
-			outputHyphens = hyphenBuffers._2;
-			writeHyphens(hyphens, inputHyphens); }
+		if (hyphenate || hyphens != null) {
+			if (hyphens == null)
+				inputHyphens = hyphenate(inbuf, text.length());
+			else {
+				if (hyphens.length != text.length() - 1)
+					throw new RuntimeException("hyphens must be equal to text length minus 1.");
+				inputHyphens = writeHyphens(hyphens, getHyphenBuffer("in", text.length())); }
+			outputHyphens = getHyphenBuffer("out", text.length() * OUTLEN_MULTIPLIER); }
 		
 		if (typeform != null) {
 			if (typeform.length != text.length())
@@ -55,17 +57,36 @@ public class Translator {
 		return new TranslationResult(outbuf, outlen, outputHyphens);
 	}
 	
+	/**
+	 * @param text The text to hyphenate. Can be multiple words.
+	 */
 	public boolean[] hyphenate(String text) {
-		WideString inbuf = getBuffers(text.length())._1;
-		inbuf.write(text);
-		return hyphenate(inbuf, text.length());
+		WideString inbuf = getBuffer("in", text.length()).write(text);
+		return readHyphens(new boolean[text.length() - 1], hyphenate(inbuf, text.length()));
 	}
 	
-	private boolean[] hyphenate(WideString inbuf, int inlen) {
-		byte[] hyphens = getHyphenBuffers(inlen)._1;
-		if (Louis.getLibrary().lou_hyphenate(tables, inbuf, inlen, hyphens, 0) == 0)
-			throw new RuntimeException("Unable to complete hyphenation");
-		return readHyphens(new boolean[inlen - 1], hyphens);
+	private byte[] hyphenate(WideString inbuf, int inlen) {
+		
+		byte[] hyphens = getHyphenBuffer("in", inlen);
+		for (int i = 0; i < inlen; i++) hyphens[i] = '0';
+		String text = inbuf.read(inlen);
+		
+		// lou_translate handles single words only
+		Matcher matcher = Pattern.compile("\\p{L}+").matcher(text);
+		byte[] wordHyphens = getHyphenBuffer("word", inlen);
+		LouisLibrary louis = Louis.getLibrary();
+		while (matcher.find()) {
+			int start = matcher.start();
+			int end = matcher.end();
+			if (louis.lou_hyphenate(tables, inbuf.substring(start), end - start, wordHyphens, 0) == 0)
+				throw new RuntimeException("Unable to complete hyphenation");
+			for (int i = 0; i < end - start; i++) hyphens[start + i] = wordHyphens[i]; }
+		
+		// Add hyphen points after hard hyphens
+		matcher = Pattern.compile("[\\p{L}\\p{N}]-(?=[\\p{L}\\p{N}])").matcher(text);
+		while (matcher.find())
+			hyphens[matcher.start() + 2] = '1';
+		return hyphens;
 	}
 	
 	/*
@@ -75,23 +96,22 @@ public class Translator {
 	 */
 	private static final int OUTLEN_MULTIPLIER = WideChar.Constants.CHARSIZE * 2 + 4;
 	
-	private static Pair<WideString> BUFFERS = getBuffers(512);
-	private static Pair<byte[]> HYPHEN_BUFFERS = getHyphenBuffers(512);
+	private static Map<String,WideString> BUFFERS = new HashMap<String,WideString>();
+	private static Map<String,byte[]> HYPHEN_BUFFERS = new HashMap<String,byte[]>();
 	
-	private static Pair<WideString> getBuffers(int capacity) {
-		if (BUFFERS == null || capacity > BUFFERS._1.length()) {
-			BUFFERS = new Pair<WideString>(
-					new WideString(capacity * 2 ),
-					new WideString(capacity * 2 * OUTLEN_MULTIPLIER)); }
-		return BUFFERS;
+	private static WideString getBuffer(String id, int minCapacity) {
+		WideString buffer = BUFFERS.get(id);
+		if (buffer == null || buffer.length() < minCapacity) {
+			buffer = new WideString(minCapacity * 2);
+			BUFFERS.put(id, buffer); }
+		return buffer;
 	}
-
-	private static Pair<byte[]> getHyphenBuffers(int capacity) {
-		if (HYPHEN_BUFFERS == null || capacity > HYPHEN_BUFFERS._1.length) {
-			HYPHEN_BUFFERS = new Pair<byte[]>(
-					new byte[capacity * 2],
-					new byte[capacity * 2 * OUTLEN_MULTIPLIER]); }
-		return HYPHEN_BUFFERS;
+		
+	private static byte[] getHyphenBuffer(String id, int minCapacity) {
+		byte[] buffer = HYPHEN_BUFFERS.get(id);
+		if (buffer == null || buffer.length < minCapacity) {
+			buffer = new byte[minCapacity * 2]; }
+		return buffer;
 	}
 	
 	private static byte[] writeHyphens(boolean[] hyphens, byte[] buffer) {
@@ -105,14 +125,5 @@ public class Translator {
 		for (int i = 0; i < hyphens.length; i++)
 			hyphens[i] = (buffer[i+1] == '1');
 		return hyphens;
-	}
-	
-	private static class Pair<T> {
-		public final T _1;
-		public final T _2;
-		public Pair(T _1, T _2) {
-			this._1 = _1;
-			this._2 = _2;
-		}
 	}
 }

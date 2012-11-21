@@ -52,12 +52,11 @@ public class Utilities {
 	public static class Environment {
 		
 		public static void setLouisTablePath(String value) {
-			if (libc instanceof UnixCLibrary) {
-				((UnixCLibrary)libc).setenv("LOUIS_TABLEPATH", value, 1); return;
-			} else {
+			if (libc instanceof UnixCLibrary)
+				((UnixCLibrary)libc).setenv("LOUIS_TABLEPATH", value, 1);
+			else {
 				((WindowsCLibrary)libc)._putenv("LOUIS_TABLEPATH=");
-				((WindowsCLibrary)libc)._putenv("LOUIS_TABLEPATH=" + value);
-			}
+				((WindowsCLibrary)libc)._putenv("LOUIS_TABLEPATH=" + value); }
 		}
 	}
 	

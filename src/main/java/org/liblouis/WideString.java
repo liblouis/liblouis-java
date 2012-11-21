@@ -6,9 +6,9 @@ import com.sun.jna.Pointer;
 import com.sun.jna.PointerType;
 
 public class WideString extends PointerType implements NativeMapped {
-
+	
 	private final int length;
-
+	
 	public WideString() {
 		this(0);
 	}
@@ -36,13 +36,14 @@ public class WideString extends PointerType implements NativeMapped {
 			throw new RuntimeException(e); }
 	}
 	
-	public void write(String value) {
+	public WideString write(String value) {
 		if (value.length() > length)
 			throw new IllegalArgumentException("Maximum string length is " + length());
 		try {
 			getPointer().write(0, value.getBytes(WideChar.Constants.ENCODING), 0, value.length() * WideChar.Constants.CHARSIZE); }
 		catch (Exception e) {
 			throw new RuntimeException(e); }
+		return this;
 	}
 	
 	@Override
@@ -58,7 +59,17 @@ public class WideString extends PointerType implements NativeMapped {
 	public int length() {
 		return length;
 	}
-
+	
+	public WideString substring(int beginIndex) {
+		return substring(beginIndex, length);
+	}
+	
+	public WideString substring(int beginIndex, int endIndex) {
+		if (beginIndex < 0 || endIndex > length || beginIndex > endIndex)
+			throw new IndexOutOfBoundsException();
+		return new WideString(getPointer(), beginIndex, endIndex - beginIndex);
+	}
+	
 	@Override
 	public String toString() {
 		return read(length());
