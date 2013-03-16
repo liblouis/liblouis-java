@@ -63,7 +63,7 @@ public class TranslatorTest {
 		File testRootDir = new File(this.getClass().getResource("/").getPath());
 		tablesDir = new File(testRootDir, "tables");
 		Louis.setLibraryPath(((Collection<File>)FileUtils.listFiles(
-				new File(testRootDir, "../nar"),
+				new File(testRootDir, "../dependency"),
 				asFileFilter(new FilenameFilter() {
 					public boolean accept(File dir, String fileName) {
 						return dir.getName().equals("shared") && fileName.startsWith("liblouis"); }}),
