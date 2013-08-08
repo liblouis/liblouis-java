@@ -19,31 +19,47 @@ public class Utilities {
 	
 	public static class Hyphenation {
 		
-		public static Pair<String,boolean[]> extractHyphens(String string, char hyphen) {
+		public static Pair<String,byte[]> extractHyphens(String string, Character shy, Character zwsp) {
+			if ((shy == null || !string.contains(String.valueOf(shy))) &&
+			    (zwsp == null || !string.contains(String.valueOf(zwsp))))
+				return new Pair<String,byte[]>(string, null);
+			final byte SHY = 1;
+			final byte ZWSP = 2;
 			StringBuffer unhyphenatedString = new StringBuffer();
-			boolean[] hyphens = new boolean[string.length()/2];
+			byte[] hyphens = new byte[string.length()/2];
 			int j = 0;
-			boolean seenHyphen = false;
+			boolean seenShy = false;
+			boolean seenZwsp = false;
 			for (int i = 0; i < string.length(); i++) {
 				char c = string.charAt(i);
-				if (c == hyphen)
-					seenHyphen = true;
-				else
+				if (c == shy)
+					seenShy = true;
+				else if (c == zwsp)
+					seenZwsp = true;
+				else {
 					unhyphenatedString.append(c);
-					hyphens[j++] = seenHyphen;
-					seenHyphen = false; }
-			return new Pair<String,boolean[]>(unhyphenatedString.toString(), Arrays.copyOf(hyphens, j-1));
+					hyphens[j++] = (seenShy ? SHY : seenZwsp ? ZWSP : 0);
+					seenShy = false;
+					seenZwsp = false; }}
+			return new Pair<String,byte[]>(unhyphenatedString.toString(), Arrays.copyOf(hyphens, j-1));
 		}
 		
-		public static String insertHyphens(String string, boolean hyphens[], char hyphen) {
+		public static String insertHyphens(String string, byte hyphens[], Character shy, Character zwsp) {
+			if ((shy == null && zwsp == null) || hyphens == null)
+				return string;
+			final byte SHY = 1;
+			final byte ZWSP = 2;
 			if (string.equals("")) return "";
 			if (hyphens.length != string.length()-1)
 				throw new RuntimeException("hyphens.length must be equal to string.length() - 1");
 			StringBuffer hyphenatedString = new StringBuffer();
-			int i; for (i = 0; i < hyphens.length; i++) {
+			int i;
+			for (i = 0; i < hyphens.length; i++) {
 				hyphenatedString.append(string.charAt(i));
-				if (hyphens[i])
-					hyphenatedString.append(hyphen); }
+				if (shy != null && hyphens[i] == SHY)
+					hyphenatedString.append(shy);
+				else if (zwsp != null && hyphens[i] == ZWSP)
+					hyphenatedString.append(zwsp); }
 			hyphenatedString.append(string.charAt(i));
 			return hyphenatedString.toString();
 		}

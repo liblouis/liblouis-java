@@ -12,6 +12,9 @@ import com.sun.jna.ptr.IntByReference;
 
 public class Translator {
 	
+	public static final byte SHY = 1;
+	public static final byte ZWSP = 2;
+	
 	private final String tables;
 	
 	public Translator(String tables) {
@@ -20,13 +23,14 @@ public class Translator {
 	
 	/**
 	 * @param text The text to translate.
+	 * @param hyphenPositions The hyphenation points of the input. Possible values are `0` (no hyphen),
+	 *        `1` (SHY, soft hyphen) or `2` (ZWSP, zero-width space). Length must be equal to
+	 *        the <code>text</code> length minus 1.
 	 * @param typeform The typeform array. Must have the same length as <code>text</code>.
-	 * @param hyphens The hyphenation points of the input. Length must be equal
-	 *        to the <code>text</code> length minus 1.
-	 * @param hyphenate Whether or not to perform hyphenation before translation.
-	 *        Will be ignored if <code>hyphens</code> is not <code>null</code>.
+	 * @return A TranslationResult containing the braille translation and, if
+	 *         <code>hyphenPositions</code> was not <code>null</code>, the output hyphen points.
 	 */
-	public TranslationResult translate(String text, byte[] typeform, boolean[] hyphens, boolean hyphenate) {
+	public TranslationResult translate(String text, byte[] hyphenPositions, byte[] typeform) {
 		
 		WideString inbuf = getBuffer("in", text.length()).write(text);
 		WideString outbuf = getBuffer("out", text.length() * OUTLEN_MULTIPLIER);
@@ -36,13 +40,10 @@ public class Translator {
 		byte[] inputHyphens = null;
 		byte[] outputHyphens = null;
 		
-		if (hyphenate || hyphens != null) {
-			if (hyphens == null)
-				inputHyphens = hyphenate(inbuf, text.length());
-			else {
-				if (hyphens.length != text.length() - 1)
-					throw new RuntimeException("hyphens must be equal to text length minus 1.");
-				inputHyphens = writeHyphens(hyphens, getHyphenBuffer("in", text.length())); }
+		if (hyphenPositions != null) {
+			if (hyphenPositions.length != text.length() - 1)
+				throw new RuntimeException("length of hyphenPositions must be equal to text length minus 1.");
+			inputHyphens = writeHyphens(hyphenPositions, getHyphenBuffer("in", text.length()));
 			outputHyphens = getHyphenBuffer("out", text.length() * OUTLEN_MULTIPLIER); }
 		
 		if (typeform != null) {
@@ -59,17 +60,15 @@ public class Translator {
 	
 	/**
 	 * @param text The text to hyphenate. Can be multiple words.
+	 * @return The hyphenation points. Possible values are `0` for no hyphenation point, `1` for a
+	 *         hyphenation point (soft hyphen), or `2` for a zero-width space (which are inserted
+	 *         after hard hyphens). Length is equal to the <code>text</code> length minus 1.
 	 */
-	public boolean[] hyphenate(String text) {
+	public byte[] hyphenate(String text) {
 		WideString inbuf = getBuffer("in", text.length()).write(text);
-		return readHyphens(new boolean[text.length() - 1], hyphenate(inbuf, text.length()));
-	}
-	
-	private byte[] hyphenate(WideString inbuf, int inlen) {
-		
-		byte[] hyphens = getHyphenBuffer("in", inlen);
+		int inlen = text.length();
+		byte[] hyphens = getHyphenBuffer("out", inlen);
 		for (int i = 0; i < inlen; i++) hyphens[i] = '0';
-		String text = inbuf.read(inlen);
 		
 		// lou_translate handles single words only
 		Matcher matcher = Pattern.compile("\\p{L}+").matcher(text);
@@ -82,11 +81,13 @@ public class Translator {
 				throw new RuntimeException("Unable to complete hyphenation");
 			for (int i = 0; i < end - start; i++) hyphens[start + i] = wordHyphens[i]; }
 		
-		// Add hyphen points after hard hyphens
+		byte[] hyphenPositions = readHyphens(new byte[text.length() - 1], hyphens);
+		
+		// add a zero-width space after hard hyphens
 		matcher = Pattern.compile("[\\p{L}\\p{N}]-(?=[\\p{L}\\p{N}])").matcher(text);
 		while (matcher.find())
-			hyphens[matcher.start() + 2] = '1';
-		return hyphens;
+			hyphenPositions[matcher.start() + 1] = ZWSP;
+		return hyphenPositions;
 	}
 	
 	/*
@@ -114,16 +115,22 @@ public class Translator {
 		return buffer;
 	}
 	
-	private static byte[] writeHyphens(boolean[] hyphens, byte[] buffer) {
+	/*
+	 * Convert a hyphen array from the form [0,1,0] to the form ['0','0','1','0']
+	 */
+	private static byte[] writeHyphens(byte[] hyphenPositions, byte[] buffer) {
 		buffer[0] = '0';
-		for (int i = 0; i < hyphens.length; i++)
-			buffer[i+1] = (byte)(hyphens[i] ? '1' : '0');
+		for (int i = 0; i < hyphenPositions.length; i++)
+			buffer[i+1] = (byte)(hyphenPositions[i] + 48);
 		return buffer;
 	}
 	
-	private static boolean[] readHyphens(boolean[] hyphens, byte[] buffer) {
-		for (int i = 0; i < hyphens.length; i++)
-			hyphens[i] = (buffer[i+1] == '1');
-		return hyphens;
+	/*
+	 * Convert a hyphen array from the form ['0','0','1','0'] to the form [0,1,0]
+	 */
+	private static byte[] readHyphens(byte[] hyphenPositions, byte[] buffer) {
+		for (int i = 0; i < hyphenPositions.length; i++)
+			hyphenPositions[i] = (byte)(buffer[i+1] - 48);
+		return hyphenPositions;
 	}
 }

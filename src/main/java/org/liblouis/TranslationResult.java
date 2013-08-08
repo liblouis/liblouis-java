@@ -5,7 +5,7 @@ import com.sun.jna.ptr.IntByReference;
 public class TranslationResult {
 	
 	private String braille = null;
-	private boolean[] hyphenPositions = null;
+	private byte[] hyphenPositions = null;
 	
 	public TranslationResult(
 			WideString outbuf,
@@ -14,16 +14,16 @@ public class TranslationResult {
 		
 		this.braille = outbuf.read(outlen.getValue());
 		if (outputHyphens != null) {
-			this.hyphenPositions = new boolean[outlen.getValue()-1];
+			this.hyphenPositions = new byte[outlen.getValue()-1];
 			for (int i=0; i<hyphenPositions.length; i++)
-				hyphenPositions[i] = (outputHyphens[i+1] == '1'); }
+				hyphenPositions[i] = (byte)(outputHyphens[i+1] - 48); }
 	}
 	
 	public String getBraille() {
 		return braille;
 		}
 
-	public boolean[] getHyphenPositions() {
+	public byte[] getHyphenPositions() {
 		return hyphenPositions;
 	}
 }

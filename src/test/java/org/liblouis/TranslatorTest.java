@@ -25,10 +25,10 @@ public class TranslatorTest {
 	
 	@Test
 	public void testTranslate() {
-		Translator translator = newTranslator("foobar.cti,foobar.dic");
+		Translator translator = newTranslator("foobar.cti");
 		assertEquals(
 			"foobar",
-			translator.translate("foobar", null, null, false).getBraille());
+			translator.translate("foobar", null, null).getBraille());
 	}
 	
 	@Test
@@ -36,16 +36,17 @@ public class TranslatorTest {
 		Translator hyphenator = newTranslator("foobar.cti,foobar.dic");
 		assertEquals(
 			"foo-bar",
-			insertHyphens("foobar", hyphenator.hyphenate("foobar"), '-'));
+			insertHyphens("foobar", hyphenator.hyphenate("foobar"), '-', null));
 	}
 	
 	@Test
 	public void testTranslateAndHyphenate() {
 		Translator translator = newTranslator("foobar.cti,foobar.dic");
-		TranslationResult result = translator.translate("foobar", null, null, true);
+		String text = "foobar";
+		TranslationResult result = translator.translate(text, translator.hyphenate(text), null);
 		assertEquals(
 				"foo-bar",
-				insertHyphens(result.getBraille(), result.getHyphenPositions(), '-'));
+				insertHyphens(result.getBraille(), result.getHyphenPositions(), '-', null));
 	}
 	
 	private Translator newTranslator(String tables) {
