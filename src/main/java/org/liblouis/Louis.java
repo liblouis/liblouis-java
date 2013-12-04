@@ -45,5 +45,7 @@ public class Louis {
 		
 		public Pointer lou_getTable(String tableList);
 		
+		public void lou_registerTableResolver(TableResolver resolver);
+		
 	}
 }
