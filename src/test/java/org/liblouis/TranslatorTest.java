@@ -23,8 +23,13 @@ public class TranslatorTest {
 			Louis.getLibrary().lou_version());
 	}
 	
+	@Test(expected=CompilationException.class)
+	public void testCompileTable() throws Exception {
+		new Translator("unexisting_file");
+	}
+	
 	@Test
-	public void testTranslate() {
+	public void testTranslate() throws Exception{
 		Translator translator = newTranslator("foobar.cti");
 		assertEquals(
 			"foobar",
@@ -32,7 +37,7 @@ public class TranslatorTest {
 	}
 	
 	@Test
-	public void testHyphenate() {
+	public void testHyphenate() throws Exception {
 		Translator hyphenator = newTranslator("foobar.cti,foobar.dic");
 		assertEquals(
 			"foo-bar",
@@ -40,7 +45,7 @@ public class TranslatorTest {
 	}
 	
 	@Test
-	public void testTranslateAndHyphenate() {
+	public void testTranslateAndHyphenate() throws Exception {
 		Translator translator = newTranslator("foobar.cti,foobar.dic");
 		String text = "foobar";
 		TranslationResult result = translator.translate(text, translator.hyphenate(text), null);
@@ -49,11 +54,8 @@ public class TranslatorTest {
 				insertHyphens(result.getBraille(), result.getHyphenPositions(), '-', null));
 	}
 	
-	private Translator newTranslator(String tables) {
-		try {
-			return new Translator(new File(tablesDir, tables).getCanonicalPath()); }
-		catch (IOException e) {
-			throw new RuntimeException(e); }
+	private Translator newTranslator(String tables) throws IOException, CompilationException {
+		return new Translator(new File(tablesDir, tables).getCanonicalPath());
 	}
 	
 	private File tablesDir;

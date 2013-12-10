@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import org.liblouis.Louis.LouisLibrary;
 
+import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 
 public class Translator {
@@ -17,7 +18,13 @@ public class Translator {
 	
 	private final String tables;
 	
-	public Translator(String tables) {
+	/**
+	 * @param tables The translation table or table list to compile.
+	 * @throws CompilationException
+	 */
+	public Translator(String tables) throws CompilationException {
+		if (Louis.getLibrary().lou_getTable(tables) == Pointer.NULL)
+			throw new CompilationException("Unable to compile table '" + tables + "'");
 		this.tables = tables;
 	}
 	
@@ -29,8 +36,10 @@ public class Translator {
 	 * @param typeform The typeform array. Must have the same length as <code>text</code>.
 	 * @return A TranslationResult containing the braille translation and, if
 	 *         <code>hyphenPositions</code> was not <code>null</code>, the output hyphen points.
+	 * @throws TranslationException
 	 */
-	public TranslationResult translate(String text, byte[] hyphenPositions, byte[] typeform) {
+	public TranslationResult translate(String text, byte[] hyphenPositions, byte[] typeform)
+			throws TranslationException {
 		
 		WideString inbuf = getBuffer("in", text.length()).write(text);
 		WideString outbuf = getBuffer("out", text.length() * OUTLEN_MULTIPLIER);
@@ -53,7 +62,7 @@ public class Translator {
 		
 		if (Louis.getLibrary().lou_translatePrehyphenated(tables, inbuf, inlen, outbuf, outlen, typeform,
 				null, null, null, null, inputHyphens, outputHyphens, 0) == 0)
-			throw new RuntimeException("Unable to complete translation");
+			throw new TranslationException("Unable to complete translation");
 		
 		return new TranslationResult(outbuf, outlen, outputHyphens);
 	}
@@ -64,7 +73,7 @@ public class Translator {
 	 *         hyphenation point (soft hyphen), or `2` for a zero-width space (which are inserted
 	 *         after hard hyphens). Length is equal to the <code>text</code> length minus 1.
 	 */
-	public byte[] hyphenate(String text) {
+	public byte[] hyphenate(String text) throws TranslationException {
 		WideString inbuf = getBuffer("in", text.length()).write(text);
 		int inlen = text.length();
 		byte[] hyphens = getHyphenBuffer("out", inlen);
@@ -78,7 +87,7 @@ public class Translator {
 			int start = matcher.start();
 			int end = matcher.end();
 			if (louis.lou_hyphenate(tables, inbuf.substring(start), end - start, wordHyphens, 0) == 0)
-				throw new RuntimeException("Unable to complete hyphenation");
+				throw new TranslationException("Unable to complete hyphenation");
 			for (int i = 0; i < end - start; i++) hyphens[start + i] = wordHyphens[i]; }
 		
 		byte[] hyphenPositions = readHyphens(new byte[text.length() - 1], hyphens);

@@ -21,7 +21,7 @@ public class TranslationResult {
 	
 	public String getBraille() {
 		return braille;
-		}
+	}
 
 	public byte[] getHyphenPositions() {
 		return hyphenPositions;

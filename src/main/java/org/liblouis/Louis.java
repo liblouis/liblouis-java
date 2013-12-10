@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 
 public class Louis {
@@ -41,6 +42,8 @@ public class Louis {
 		public int lou_free();
 		
 		public String lou_version();
+		
+		public Pointer lou_getTable(String tableList);
 		
 	}
 }
