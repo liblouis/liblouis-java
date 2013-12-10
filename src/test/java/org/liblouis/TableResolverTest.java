@@ -31,12 +31,12 @@ public class TableResolverTest {
 	public void registerMagicTokenResolver() {
 		Louis.getLibrary().lou_registerTableResolver(
 			new TableResolver() {
-				public String invoke(String table, String base) {
+				public File invoke(String table, String base) {
 					if (table == null)
 						return null;
 					File tableFile = new File(testRootDir, table);
 					if (tableFile.exists())
-						return tableFile.getAbsolutePath();
+						return tableFile;
 					if (table.equals("<FOOBAR>"))
 						return invoke("tables/foobar.cti", null);
 					return null;

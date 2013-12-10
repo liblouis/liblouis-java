@@ -3,10 +3,13 @@ package org.liblouis;
 import java.io.File;
 import java.io.IOException;
 
+import com.sun.jna.DefaultTypeMapper;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.ToNativeContext;
+import com.sun.jna.ToNativeConverter;
 
 public class Louis {
 	
@@ -47,5 +50,24 @@ public class Louis {
 		
 		public void lou_registerTableResolver(TableResolver resolver);
 		
+	}
+	
+	public static class TypeMapper extends DefaultTypeMapper {
+		
+		public static final TypeMapper INSTANCE = new TypeMapper();
+		
+		protected TypeMapper() {
+			ToNativeConverter fileToPathConverter = new ToNativeConverter() {
+				public Class nativeType() {
+					return String.class;
+				}
+				public Object toNative(Object file, ToNativeContext context) {
+					if (file == null)
+						return null;
+					return ((File)file).getAbsolutePath();
+				}
+			};
+			addToNativeConverter(File.class, fileToPathConverter);
+		}
 	}
 }
