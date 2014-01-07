@@ -8,6 +8,7 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
+import com.sun.jna.StringArray;
 import com.sun.jna.ToNativeContext;
 import com.sun.jna.ToNativeConverter;
 
@@ -64,10 +65,17 @@ public class Louis {
 				public Object toNative(Object file, ToNativeContext context) {
 					if (file == null)
 						return null;
+					if (file instanceof File[]) {
+						File[] files = ((File[])file);
+						String[] paths = new String[files.length];
+						for (int i = 0; i < files.length; i++)
+							paths[i] = (String)toNative(files[i], context);
+						return new StringArray(paths); }
 					return ((File)file).getAbsolutePath();
 				}
 			};
 			addToNativeConverter(File.class, fileToPathConverter);
+			addToNativeConverter(File[].class, fileToPathConverter);
 		}
 	}
 }

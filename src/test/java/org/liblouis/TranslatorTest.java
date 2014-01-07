@@ -29,7 +29,7 @@ public class TranslatorTest {
 	}
 	
 	@Test
-	public void testTranslate() throws Exception{
+	public void testTranslate() throws Exception {
 		Translator translator = newTranslator("foobar.cti");
 		assertEquals(
 			"foobar",
