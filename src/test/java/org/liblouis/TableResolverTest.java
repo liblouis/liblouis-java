@@ -31,7 +31,7 @@ public class TableResolverTest {
 	public void registerMagicTokenResolver() {
 		Louis.getLibrary().lou_registerTableResolver(
 			new TableResolver() {
-				public File[] invoke(String table, String base) {
+				public File[] invoke(String table, File base) {
 					if (table == null)
 						return null;
 					File tableFile = new File(testRootDir, table);

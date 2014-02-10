@@ -9,8 +9,9 @@ import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.StringArray;
+import com.sun.jna.FromNativeContext;
 import com.sun.jna.ToNativeContext;
-import com.sun.jna.ToNativeConverter;
+import com.sun.jna.TypeConverter;
 
 public class Louis {
 	
@@ -58,8 +59,8 @@ public class Louis {
 		public static final TypeMapper INSTANCE = new TypeMapper();
 		
 		protected TypeMapper() {
-			ToNativeConverter fileToPathConverter = new ToNativeConverter() {
-				public Class nativeType() {
+			TypeConverter converter = new TypeConverter() {
+				public Class<?> nativeType() {
 					return String.class;
 				}
 				public Object toNative(Object file, ToNativeContext context) {
@@ -71,11 +72,18 @@ public class Louis {
 						for (int i = 0; i < files.length; i++)
 							paths[i] = (String)toNative(files[i], context);
 						return new StringArray(paths); }
-					return ((File)file).getAbsolutePath();
+					try { return ((File)file).getCanonicalPath(); }
+					catch (IOException e) { return null; }
+				}
+				public Object fromNative(Object file, FromNativeContext context) {
+					if (file == null)
+						return null;
+					return new File(((Pointer)file).getString(0));
 				}
 			};
-			addToNativeConverter(File.class, fileToPathConverter);
-			addToNativeConverter(File[].class, fileToPathConverter);
+			addToNativeConverter(File.class, converter);
+			addToNativeConverter(File[].class, converter);
+			addFromNativeConverter(File.class, converter);
 		}
 	}
 }
