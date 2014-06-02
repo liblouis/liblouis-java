@@ -101,6 +101,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <forkMode>pertest</forkMode>
+          <systemPropertyVariables>
+            <jna.nosys>true</jna.nosys>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
       <plugin>
