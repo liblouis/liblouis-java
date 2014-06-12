@@ -19,7 +19,7 @@ public class TranslatorTest {
 	@Test
 	public void testVersion() {
 		assertEquals(
-			"2.5.4",
+			"2.6.0-SNAPSHOT",
 			Louis.getLibrary().lou_version());
 	}
 	

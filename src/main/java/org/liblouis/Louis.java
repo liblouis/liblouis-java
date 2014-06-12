@@ -52,6 +52,10 @@ public class Louis {
 		
 		public void lou_registerTableResolver(TableResolver resolver);
 		
+		public void lou_registerLogCallback(Logger logger);
+		
+		public void lou_setLogLevel(int level);
+		
 	}
 	
 	public static class TypeMapper extends DefaultTypeMapper {
