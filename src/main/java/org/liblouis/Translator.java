@@ -99,6 +99,15 @@ public class Translator {
 		return hyphenPositions;
 	}
 	
+	public String display(String braille) throws TranslationException {
+		WideString inbuf = getBuffer("in", braille.length()).write(braille);
+		int length = braille.length();
+		WideString outbuf = getBuffer("out", braille.length() * OUTLEN_MULTIPLIER);
+		if (Louis.getLibrary().lou_dotsToChar(tables, inbuf, outbuf, length, 0) == 0)
+			throw new TranslationException("Unable to complete translation");
+		return outbuf.read(length);
+	}
+	
 	/*
 	 * Number by which the input length should be multiplied to calculate
 	 * the maximum output length. This default will handle the case where

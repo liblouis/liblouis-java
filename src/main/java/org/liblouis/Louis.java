@@ -42,6 +42,8 @@ public class Louis {
 		
 		public int lou_hyphenate(String tableList, WideString inbuf, int inlen, byte[] hyphens, int mode);
 		
+		public int lou_dotsToChar(String tableList, WideString inbuf, WideString outbuf, int length, int mode);
+		
 		public int lou_charSize();
 		
 		public int lou_free();

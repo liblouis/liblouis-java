@@ -54,6 +54,12 @@ public class TranslatorTest {
 				insertHyphens(result.getBraille(), result.getHyphenPositions(), '-', null));
 	}
 	
+	@Test
+	public void testDisplay() throws Exception {
+		Translator translator = newTranslator("foobar.cti");
+		assertEquals("foobar", translator.display("⠋⠕⠕⠃⠁⠗"));
+	}
+	
 	private Translator newTranslator(String tables) throws IOException, CompilationException {
 		return new Translator(new File(tablesDir, tables).getCanonicalPath());
 	}
