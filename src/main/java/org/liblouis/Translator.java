@@ -20,12 +20,25 @@ public class Translator {
 	
 	/**
 	 * @param table The translation table or table list to compile.
-	 * @throws CompilationException
+	 * @throws CompilationException if the table could not be found or if it
+	 * could not be compiled.
 	 */
 	public Translator(String table) throws CompilationException {
 		if (Louis.getLibrary().lou_getTable(table) == Pointer.NULL)
 			throw new CompilationException("Unable to compile table '" + table + "'");
 		this.table = table;
+	}
+	
+	/**
+	 * @param query A table query
+	 * @throws CompilationException if no match could be found or if the
+	 * matched table could not be compiled.
+	 */
+	public static Translator find(String query) throws CompilationException {
+		String table = Louis.getLibrary().lou_findTable(query);
+		if (table == null)
+			throw new CompilationException("No match found for query '" + query + "'");
+		return new Translator(table);
 	}
 	
 	public String getTable() {
