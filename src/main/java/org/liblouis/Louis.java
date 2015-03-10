@@ -58,6 +58,10 @@ public class Louis {
 		
 		public void lou_setLogLevel(int level);
 		
+		public int lou_indexTables(String[] tables);
+		
+		public String lou_findTable(String query);
+		
 	}
 	
 	public static class TypeMapper extends DefaultTypeMapper {

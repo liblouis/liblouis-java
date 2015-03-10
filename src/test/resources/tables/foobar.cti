@@ -1,3 +1,5 @@
+#+locale: foo
+
 uplow Aa 1
 uplow Bb 12
 uplow Cc 14
