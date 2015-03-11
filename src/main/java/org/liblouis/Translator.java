@@ -16,16 +16,20 @@ public class Translator {
 	public static final byte SHY = 1;
 	public static final byte ZWSP = 2;
 	
-	private final String tables;
+	private final String table;
 	
 	/**
-	 * @param tables The translation table or table list to compile.
+	 * @param table The translation table or table list to compile.
 	 * @throws CompilationException
 	 */
-	public Translator(String tables) throws CompilationException {
-		if (Louis.getLibrary().lou_getTable(tables) == Pointer.NULL)
-			throw new CompilationException("Unable to compile table '" + tables + "'");
-		this.tables = tables;
+	public Translator(String table) throws CompilationException {
+		if (Louis.getLibrary().lou_getTable(table) == Pointer.NULL)
+			throw new CompilationException("Unable to compile table '" + table + "'");
+		this.table = table;
+	}
+	
+	public String getTable() {
+		return table;
 	}
 	
 	/**
@@ -60,7 +64,7 @@ public class Translator {
 				throw new RuntimeException("typeform length must be equal to text length.");
 			typeform = Arrays.copyOf(typeform, outbuf.length()); }
 		
-		if (Louis.getLibrary().lou_translatePrehyphenated(tables, inbuf, inlen, outbuf, outlen, typeform,
+		if (Louis.getLibrary().lou_translatePrehyphenated(table, inbuf, inlen, outbuf, outlen, typeform,
 				null, null, null, null, inputHyphens, outputHyphens, 0) == 0)
 			throw new TranslationException("Unable to complete translation");
 		
@@ -74,7 +78,7 @@ public class Translator {
 		IntByReference inlen = new IntByReference(text.length());
 		IntByReference outlen = new IntByReference(outbuf.length());
 		
-		if (Louis.getLibrary().lou_backTranslate(tables, inbuf, inlen, outbuf, outlen,
+		if (Louis.getLibrary().lou_backTranslate(table, inbuf, inlen, outbuf, outlen,
 				null, null, null, null, null, 0) == 0)
 			throw new TranslationException("Unable to complete translation");
 		
@@ -100,7 +104,7 @@ public class Translator {
 		while (matcher.find()) {
 			int start = matcher.start();
 			int end = matcher.end();
-			if (louis.lou_hyphenate(tables, inbuf.substring(start), end - start, wordHyphens, 0) == 0)
+			if (louis.lou_hyphenate(table, inbuf.substring(start), end - start, wordHyphens, 0) == 0)
 				throw new TranslationException("Unable to complete hyphenation");
 			for (int i = 0; i < end - start; i++) hyphens[start + i] = wordHyphens[i]; }
 		
@@ -117,7 +121,7 @@ public class Translator {
 		WideString inbuf = getWideCharBuffer("text-in", braille.length()).write(braille);
 		int length = braille.length();
 		WideString outbuf = getWideCharBuffer("text-out", braille.length() * OUTLEN_MULTIPLIER);
-		if (Louis.getLibrary().lou_dotsToChar(tables, inbuf, outbuf, length, 0) == 0)
+		if (Louis.getLibrary().lou_dotsToChar(table, inbuf, outbuf, length, 0) == 0)
 			throw new TranslationException("Unable to complete translation");
 		return outbuf.read(length);
 	}
@@ -169,6 +173,6 @@ public class Translator {
 	
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + "{table=" + tables + "}";
+		return getClass().getSimpleName() + "{table=" + table + "}";
 	}
 }
