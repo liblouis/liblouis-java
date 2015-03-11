@@ -29,6 +29,15 @@ public class TranslatorTest {
 	}
 	
 	@Test
+	public void testToString() throws Exception {
+		String tableFile = new File(tablesDir, "foobar.cti").getCanonicalPath();
+		Translator translator = new Translator(tableFile);
+		assertEquals(
+			"Translator{table=" + tableFile + "}",
+			translator.toString());
+	}
+	
+	@Test
 	public void testTranslate() throws Exception {
 		Translator translator = newTranslator("foobar.cti");
 		assertEquals(

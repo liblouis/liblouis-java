@@ -168,4 +168,31 @@ public class Translator {
 			hyphenPositions[i] = (byte)(buffer[i+1] - 48);
 		return hyphenPositions;
 	}
+	
+	@Override
+	public String toString() {
+		return Translator.class.getSimpleName() + "{table=" + table + "}";
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int hash = 1;
+		hash = prime * hash + table.hashCode();
+		return hash;
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if (this == object)
+			return true;
+		if (object == null)
+			return false;
+		if (object.getClass() != Translator.class)
+			return false;
+		Translator that = (Translator)object;
+		if (!this.table.equals(that.table))
+			return false;
+		return true;
+	}
 }
