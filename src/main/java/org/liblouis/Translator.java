@@ -37,7 +37,7 @@ public class Translator {
 	public static Translator find(String query) throws CompilationException {
 		String table = Louis.getLibrary().lou_findTable(query);
 		if (table == null)
-			throw new CompilationException("No match found for query'" + query + "'");
+			throw new CompilationException("No match found for query '" + query + "'");
 		return new Translator(table);
 	}
 	
