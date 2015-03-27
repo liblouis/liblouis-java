@@ -151,4 +151,9 @@ public class Translator {
 			hyphenPositions[i] = (byte)(buffer[i+1] - 48);
 		return hyphenPositions;
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "{table=" + tables + "}";
+	}
 }
