@@ -41,8 +41,8 @@ public class Translator {
 	public TranslationResult translate(String text, byte[] hyphenPositions, byte[] typeform)
 			throws TranslationException {
 		
-		WideString inbuf = getBuffer("in", text.length()).write(text);
-		WideString outbuf = getBuffer("out", text.length() * OUTLEN_MULTIPLIER);
+		WideString inbuf = getWideCharBuffer("text-in", text.length()).write(text);
+		WideString outbuf = getWideCharBuffer("text-out", text.length() * OUTLEN_MULTIPLIER);
 		IntByReference inlen = new IntByReference(text.length());
 		IntByReference outlen = new IntByReference(outbuf.length());
 		
@@ -52,8 +52,8 @@ public class Translator {
 		if (hyphenPositions != null) {
 			if (hyphenPositions.length != text.length() - 1)
 				throw new RuntimeException("length of hyphenPositions must be equal to text length minus 1.");
-			inputHyphens = writeHyphens(hyphenPositions, getHyphenBuffer("in", text.length()));
-			outputHyphens = getHyphenBuffer("out", text.length() * OUTLEN_MULTIPLIER); }
+			inputHyphens = writeHyphens(hyphenPositions, getByteBuffer("hyphens-in", text.length()));
+			outputHyphens = getByteBuffer("hyphens-out", text.length() * OUTLEN_MULTIPLIER); }
 		
 		if (typeform != null) {
 			if (typeform.length != text.length())
@@ -67,6 +67,20 @@ public class Translator {
 		return new TranslationResult(outbuf, outlen, outputHyphens);
 	}
 	
+	public String backTranslate(String text) throws TranslationException {
+		
+		WideString inbuf = getWideCharBuffer("text-in", text.length()).write(text);
+		WideString outbuf = getWideCharBuffer("text-out", text.length() * OUTLEN_MULTIPLIER);
+		IntByReference inlen = new IntByReference(text.length());
+		IntByReference outlen = new IntByReference(outbuf.length());
+		
+		if (Louis.getLibrary().lou_backTranslate(tables, inbuf, inlen, outbuf, outlen,
+				null, null, null, null, null, 0) == 0)
+			throw new TranslationException("Unable to complete translation");
+		
+		return outbuf.read(outlen.getValue());
+	}
+	
 	/**
 	 * @param text The text to hyphenate. Can be multiple words.
 	 * @return The hyphenation points. Possible values are `0` for no hyphenation point, `1` for a
@@ -74,14 +88,14 @@ public class Translator {
 	 *         after hard hyphens). Length is equal to the <code>text</code> length minus 1.
 	 */
 	public byte[] hyphenate(String text) throws TranslationException {
-		WideString inbuf = getBuffer("in", text.length()).write(text);
+		WideString inbuf = getWideCharBuffer("text-in", text.length()).write(text);
 		int inlen = text.length();
-		byte[] hyphens = getHyphenBuffer("out", inlen);
+		byte[] hyphens = getByteBuffer("hyphens-out", inlen);
 		for (int i = 0; i < inlen; i++) hyphens[i] = '0';
 		
 		// lou_translate handles single words only
 		Matcher matcher = Pattern.compile("\\p{L}+").matcher(text);
-		byte[] wordHyphens = getHyphenBuffer("word", inlen);
+		byte[] wordHyphens = getByteBuffer("hyphens-word", inlen);
 		LouisLibrary louis = Louis.getLibrary();
 		while (matcher.find()) {
 			int start = matcher.start();
@@ -100,9 +114,9 @@ public class Translator {
 	}
 	
 	public String display(String braille) throws TranslationException {
-		WideString inbuf = getBuffer("in", braille.length()).write(braille);
+		WideString inbuf = getWideCharBuffer("text-in", braille.length()).write(braille);
 		int length = braille.length();
-		WideString outbuf = getBuffer("out", braille.length() * OUTLEN_MULTIPLIER);
+		WideString outbuf = getWideCharBuffer("text-out", braille.length() * OUTLEN_MULTIPLIER);
 		if (Louis.getLibrary().lou_dotsToChar(tables, inbuf, outbuf, length, 0) == 0)
 			throw new TranslationException("Unable to complete translation");
 		return outbuf.read(length);
@@ -115,21 +129,22 @@ public class Translator {
 	 */
 	private static final int OUTLEN_MULTIPLIER = WideChar.Constants.CHARSIZE * 2 + 4;
 	
-	private static Map<String,WideString> BUFFERS = new HashMap<String,WideString>();
-	private static Map<String,byte[]> HYPHEN_BUFFERS = new HashMap<String,byte[]>();
+	private static Map<String,WideString> WIDECHAR_BUFFERS = new HashMap<String,WideString>();
+	private static Map<String,byte[]> BYTE_BUFFERS = new HashMap<String,byte[]>();
 	
-	private static WideString getBuffer(String id, int minCapacity) {
-		WideString buffer = BUFFERS.get(id);
+	private static WideString getWideCharBuffer(String id, int minCapacity) {
+		WideString buffer = WIDECHAR_BUFFERS.get(id);
 		if (buffer == null || buffer.length() < minCapacity) {
 			buffer = new WideString(minCapacity * 2);
-			BUFFERS.put(id, buffer); }
+			WIDECHAR_BUFFERS.put(id, buffer); }
 		return buffer;
 	}
 		
-	private static byte[] getHyphenBuffer(String id, int minCapacity) {
-		byte[] buffer = HYPHEN_BUFFERS.get(id);
+	private static byte[] getByteBuffer(String id, int minCapacity) {
+		byte[] buffer = BYTE_BUFFERS.get(id);
 		if (buffer == null || buffer.length < minCapacity) {
-			buffer = new byte[minCapacity * 2]; }
+			buffer = new byte[minCapacity * 2];
+			BYTE_BUFFERS.put(id, buffer); }
 		return buffer;
 	}
 	

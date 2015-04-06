@@ -46,6 +46,12 @@ public class TranslatorTest {
 	}
 	
 	@Test
+	public void testBackTranslate() throws Exception {
+		Translator translator = newTranslator("foobar.cti");
+		assertEquals("foobar", translator.backTranslate("foobar"));
+	}
+	
+	@Test
 	public void testHyphenate() throws Exception {
 		Translator hyphenator = newTranslator("foobar.cti,foobar.dic");
 		assertEquals(
