@@ -36,9 +36,13 @@ public class Louis {
 	public interface LouisLibrary extends Library {
 		
 		public int lou_translatePrehyphenated(String tableList, WideString inbuf, IntByReference inlen,
-				WideString outbuf, IntByReference outlen, byte typeform[], byte spacing[],
+				WideString outbuf, IntByReference outlen, byte[] typeform, byte[] spacing,
 				int[] outputPos, int[] inputPos, IntByReference cursorPos,
 				byte[] inputHyphens, byte[] outputHyphens, int mode);
+		
+		public int lou_backTranslate(String tableList, WideString inbuf, IntByReference inlen,
+				WideString outbuf, IntByReference outlen, byte[] typeform, byte[] spacing,
+				int[] outputPos, int[] inputPos, IntByReference cursorPos, int mode);
 		
 		public int lou_hyphenate(String tableList, WideString inbuf, int inlen, byte[] hyphens, int mode);
 		
