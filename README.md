@@ -1,6 +1,8 @@
 [liblouis-java][]
 =================
 
+[![Build Status](https://travis-ci.org/liblouis/liblouis-java.png?branch=master)](https://travis-ci.org/liblouis/liblouis-java)
+
 Java bindings to [liblouis][], an open-source braille translator and back-translator.
 The bindings are based on [JNA][].
 
