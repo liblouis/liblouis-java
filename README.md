@@ -12,6 +12,11 @@ Building
  * `mvn clean` will remove generated files
  * `mvn package` will build the JAR
 
+Deploying
+--------
+
+ * `mvn deploy -Psonatype-deploy` will deploy to Sonatype OSS
+ 
 Authors
 -------
 
