@@ -1,5 +1,6 @@
 package org.liblouis;
 
+@SuppressWarnings("serial")
 public class TranslationException extends Exception {
 	
 	public TranslationException(String message) {
