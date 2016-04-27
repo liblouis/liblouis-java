@@ -47,41 +47,52 @@ public class Translator {
 	
 	/**
 	 * @param text The text to translate.
-	 * @param hyphenPositions The hyphenation points of the input. Possible values are `0` (no hyphen),
-	 *        `1` (SHY, soft hyphen) or `2` (ZWSP, zero-width space). Length must be equal to
-	 *        the <code>text</code> length minus 1.
-	 * @param typeform The typeform array. Must have the same length as <code>text</code>.
-	 * @return A TranslationResult containing the braille translation and, if
-	 *         <code>hyphenPositions</code> was not <code>null</code>, the output hyphen points.
-	 * @throws TranslationException
+	 * @param typeform Array with typeform information about the text. Must have the same length as
+	 *                 <code>text</code>. May be null.
+	 * @param characterAttributes Array with other information about the text that will be passed on
+	 *                            to the output. May for example be used for numbering all
+	 *                            characters in the input text in order to obtain a full mapping
+	 *                            between input and output. Array must have the same length as
+	 *                            <code>text</code>. May be null.
+	 * @param interCharacterAttributes Array with information about the positions between characters
+	 *                                 that will be passed on to the output. May for example be used
+	 *                                 to track hyphenation points (e.g. `0` for no hyphenation
+	 *                                 point opportunity, `1` for soft hyphen and `2` for zero-width
+	 *                                 space). Length must be equal to the <code>text</code> length
+	 *                                 minus 1.
+	 * @return A TranslationResult containing the braille translation, the output character
+	 *         attributes (or <code>null</code> if <code>characterAttributes</code> was
+	 *         <code>null</code>), and the output inter-character attributes (or <code>null</code>
+	 *         if <code>interCharacterAttributes</code> was <code>null</code>).
+	 * @throws TranslationException if the translation could not be completed.
 	 */
-	public TranslationResult translate(String text, byte[] hyphenPositions, byte[] typeform)
+	public TranslationResult translate(String text,
+	                                   byte[] typeform,
+	                                   int[] characterAttributes,
+	                                   int[] interCharacterAttributes)
 			throws TranslationException {
-		
+		if (typeform != null)
+			if (typeform.length != text.length())
+				throw new IllegalArgumentException("typeform length must be equal to text length");
+		if (characterAttributes != null)
+			if (characterAttributes.length != text.length())
+				throw new IllegalArgumentException("characterAttributes length must be equal to text length");
+		if (interCharacterAttributes != null)
+			if (interCharacterAttributes.length != text.length() - 1)
+				throw new IllegalArgumentException("interCharacterAttributes length must be equal to text length minus 1");
 		WideString inbuf = getWideCharBuffer("text-in", text.length()).write(text);
 		WideString outbuf = getWideCharBuffer("text-out", text.length() * OUTLEN_MULTIPLIER);
 		IntByReference inlen = new IntByReference(text.length());
 		IntByReference outlen = new IntByReference(outbuf.length());
-		
-		byte[] inputHyphens = null;
-		byte[] outputHyphens = null;
-		
-		if (hyphenPositions != null) {
-			if (hyphenPositions.length != text.length() - 1)
-				throw new RuntimeException("length of hyphenPositions must be equal to text length minus 1.");
-			inputHyphens = writeHyphens(hyphenPositions, getByteBuffer("hyphens-in", text.length()));
-			outputHyphens = getByteBuffer("hyphens-out", text.length() * OUTLEN_MULTIPLIER); }
-		
-		if (typeform != null) {
-			if (typeform.length != text.length())
-				throw new RuntimeException("typeform length must be equal to text length.");
-			typeform = Arrays.copyOf(typeform, outbuf.length()); }
-		
-		if (Louis.getLibrary().lou_translatePrehyphenated(table, inbuf, inlen, outbuf, outlen, typeform,
-				null, null, null, null, inputHyphens, outputHyphens, 0) == 0)
+		int[] inputPos = null;
+		if (typeform != null)
+			typeform = Arrays.copyOf(typeform, outbuf.length());
+		if (characterAttributes != null || interCharacterAttributes != null)
+			inputPos = getIntegerBuffer("inputpos", text.length() * OUTLEN_MULTIPLIER);
+		if (Louis.getLibrary().lou_translate(table, inbuf, inlen, outbuf, outlen, typeform,
+		                                     null, null, inputPos, null, 0) == 0)
 			throw new TranslationException("Unable to complete translation");
-		
-		return new TranslationResult(outbuf, outlen, outputHyphens);
+		return new TranslationResult(outbuf, outlen, inputPos, characterAttributes, interCharacterAttributes);
 	}
 	
 	public String backTranslate(String text) throws TranslationException {
@@ -148,6 +159,7 @@ public class Translator {
 	
 	private static Map<String,WideString> WIDECHAR_BUFFERS = new HashMap<String,WideString>();
 	private static Map<String,byte[]> BYTE_BUFFERS = new HashMap<String,byte[]>();
+	private static Map<String,int[]> INT_BUFFERS = new HashMap<String,int[]>();
 	
 	private static WideString getWideCharBuffer(String id, int minCapacity) {
 		WideString buffer = WIDECHAR_BUFFERS.get(id);
@@ -165,9 +177,18 @@ public class Translator {
 		return buffer;
 	}
 	
+	private static int[] getIntegerBuffer(String id, int minCapacity) {
+		int[] buffer = INT_BUFFERS.get(id);
+		if (buffer == null || buffer.length < minCapacity) {
+			buffer = new int[minCapacity * 2];
+			INT_BUFFERS.put(id, buffer); }
+		return buffer;
+	}
+
 	/*
 	 * Convert a hyphen array from the form [0,1,0] to the form ['0','0','1','0']
 	 */
+	@SuppressWarnings("unused")
 	private static byte[] writeHyphens(byte[] hyphenPositions, byte[] buffer) {
 		buffer[0] = '0';
 		for (int i = 0; i < hyphenPositions.length; i++)

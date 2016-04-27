@@ -8,7 +8,6 @@ import static org.apache.commons.io.filefilter.FileFilterUtils.asFileFilter;
 import static org.apache.commons.io.filefilter.FileFilterUtils.trueFileFilter;
 import org.apache.commons.io.FileUtils;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -20,7 +19,7 @@ public class TableResolverTest {
 		Translator translator = new Translator("<FOOBAR>");
 		assertEquals(
 			"foobar",
-			translator.translate("foobar", null, null).getBraille());
+			translator.translate("foobar", null, null, null).getBraille());
 	}
 	
 	@Test
@@ -28,12 +27,11 @@ public class TableResolverTest {
 		Translator translator = new Translator("tables/include_magic_token");
 		assertEquals(
 			"foobar",
-			translator.translate("foobar", null, null).getBraille());
+			translator.translate("foobar", null, null, null).getBraille());
 	}
 	
-	@Before
 	@SuppressWarnings("unchecked")
-	public void initialize() {
+	public TableResolverTest() {
 		final File testRootDir = new File(this.getClass().getResource("/").getPath());
 		Louis.setLibraryPath(((Collection<File>)FileUtils.listFiles(
 				new File(testRootDir, "../dependency"),

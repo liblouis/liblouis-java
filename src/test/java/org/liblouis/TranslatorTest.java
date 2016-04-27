@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.apache.commons.io.filefilter.FileFilterUtils.asFileFilter;
@@ -42,7 +41,7 @@ public class TranslatorTest {
 		Translator translator = newTranslator("foobar.cti");
 		assertEquals(
 			"foobar",
-			translator.translate("foobar", null, null).getBraille());
+			translator.translate("foobar", null, null, null).getBraille());
 	}
 	
 	@Test
@@ -63,10 +62,10 @@ public class TranslatorTest {
 	public void testTranslateAndHyphenate() throws Exception {
 		Translator translator = newTranslator("foobar.cti,foobar.dic");
 		String text = "foobar";
-		TranslationResult result = translator.translate(text, translator.hyphenate(text), null);
+		TranslationResult result = translator.translate(text, null, null, byteToInt(translator.hyphenate(text)));
 		assertEquals(
 				"foo-bar",
-				insertHyphens(result.getBraille(), result.getHyphenPositions(), '-', null));
+				insertHyphens(result.getBraille(), intToByte(result.getInterCharacterAttributes()), '-', null));
 	}
 	
 	@Test
@@ -79,11 +78,24 @@ public class TranslatorTest {
 		return new Translator(new File(tablesDir, tables).getCanonicalPath());
 	}
 	
-	private File tablesDir;
+	private byte[] intToByte(int [] array) {
+		byte[] ret = new byte[array.length];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = (byte)array[i];
+		return ret;
+	}
 	
-	@Before
+	private int[] byteToInt(byte [] array) {
+		int[] ret = new int[array.length];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = array[i];
+		return ret;
+	}
+	
+	private final File tablesDir;
+
 	@SuppressWarnings("unchecked")
-	public void initialize() {
+	public TranslatorTest() {
 		File testRootDir = new File(this.getClass().getResource("/").getPath());
 		tablesDir = new File(testRootDir, "tables");
 		Louis.setLibraryPath(((Collection<File>)FileUtils.listFiles(

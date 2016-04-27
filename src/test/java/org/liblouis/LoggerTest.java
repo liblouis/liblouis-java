@@ -10,7 +10,6 @@ import static org.apache.commons.io.filefilter.FileFilterUtils.asFileFilter;
 import static org.apache.commons.io.filefilter.FileFilterUtils.trueFileFilter;
 import org.apache.commons.io.FileUtils;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -39,11 +38,10 @@ public class LoggerTest {
 		assertEquals("", logger.toString());
 	}
 	
-	private ByteArrayLogger logger;
+	private final ByteArrayLogger logger;
 	
-	@Before
 	@SuppressWarnings("unchecked")
-	public void initialize() {
+	public LoggerTest() {
 		final File testRootDir = new File(this.getClass().getResource("/").getPath());
 		Louis.setLibraryPath(((Collection<File>)FileUtils.listFiles(
 				new File(testRootDir, "../dependency"),
