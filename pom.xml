@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.liblouis</groupId>
   <artifactId>liblouis-java</artifactId>
-  <version>2.0.0</version>
+  <version>3.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>liblouis-java</name>
   <description>JNA based Java bindings to liblouis, an open-source braille translator and back-translator.</description>
@@ -43,7 +43,7 @@
     <dependency>
       <groupId>org.liblouis</groupId>
       <artifactId>louis</artifactId>
-      <version>2.6.3</version>
+      <version>3.0.0-alpha1</version>
       <type>nar</type>
       <scope>test</scope>
     </dependency>
@@ -63,8 +63,9 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-nar-plugin</artifactId>
-        <version>2.1-SNAPSHOT</version>
+        <groupId>com.github.maven-nar</groupId>
+        <artifactId>nar-maven-plugin</artifactId>
+        <version>3.4.0</version>
         <executions>
           <execution>
             <id>unpack-liblouis</id>
@@ -171,16 +172,6 @@
       </build>
     </profile>
   </profiles>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>bertfrees-github-snapshots</id>
-      <url>http://bertfrees.github.com/snapshots</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>duns-maven-snapshots</id>
-      <url>http://duns.github.com/maven-snapshots</url>
-    </pluginRepository>
-  </pluginRepositories>
   <distributionManagement>
     <repository>
       <id>sonatype-nexus-staging</id>

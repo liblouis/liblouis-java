@@ -18,7 +18,7 @@ public class TranslatorTest {
 	@Test
 	public void testVersion() {
 		assertEquals(
-			"2.6.3",
+			"3.0.0-alpha1",
 			Louis.getLibrary().lou_version());
 	}
 	
@@ -72,6 +72,14 @@ public class TranslatorTest {
 	public void testDisplay() throws Exception {
 		Translator translator = newTranslator("foobar.cti");
 		assertEquals("foobar", translator.display("⠋⠕⠕⠃⠁⠗"));
+	}
+	
+	@Test
+	public void testTypeform() throws Exception {
+		Translator translator = newTranslator("foobar.cti");
+		assertEquals(
+			"/foobar/",
+			translator.translate("foobar", new short[]{1,1,1,1,1,1}, null, null).getBraille());
 	}
 	
 	private Translator newTranslator(String tables) throws IOException, CompilationException {

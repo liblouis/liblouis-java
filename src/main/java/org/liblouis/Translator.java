@@ -67,7 +67,7 @@ public class Translator {
 	 * @throws TranslationException if the translation could not be completed.
 	 */
 	public TranslationResult translate(String text,
-	                                   byte[] typeform,
+	                                   short[] typeform,
 	                                   int[] characterAttributes,
 	                                   int[] interCharacterAttributes)
 			throws TranslationException {

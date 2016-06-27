@@ -1,9 +1,9 @@
 language: java
 before_install:
-- source <(curl -fsSL https://raw.github.com/liblouis/liblouis-java/travis/before_install)
+- source <(curl -fsSL https://raw.github.com/daisy/maven-parents/travis/before_install)
 script: mvn verify
 after_success:
-- source <(curl -fsSL https://raw.github.com/liblouis/liblouis-java/travis/after_success)
+- source <(curl -fsSL https://raw.github.com/daisy/maven-parents/travis/after_success)
 branches:
   only:
   - master
