@@ -29,7 +29,7 @@ public class LoggerTest {
 		catch (CompilationException e) {}
 		assertEquals("[ERROR] Cannot resolve table 'unexisting_file'" + "\n" +
 		             "[ERROR] 1 errors found."                        + "\n" +
-		             "[ERROR] unexisting_file could not be found"     + "\n",
+		             "[ERROR] unexisting_file could not be compiled"  + "\n",
 		             logger.toString());
 		logger.reset();
 		Louis.getLibrary().lou_setLogLevel(FATAL);
