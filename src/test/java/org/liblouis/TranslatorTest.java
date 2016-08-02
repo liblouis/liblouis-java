@@ -18,7 +18,7 @@ public class TranslatorTest {
 	@Test
 	public void testVersion() {
 		assertEquals(
-			"3.0.0-alpha1",
+			"3.0.0",
 			Louis.getLibrary().lou_version());
 	}
 	
