@@ -30,6 +30,16 @@ public class TableResolverTest {
 			translator.translate("foobar", null, null, null).getBraille());
 	}
 	
+	@Test
+	public void testDeepIncludes() throws Exception {
+		new Translator("tables/1");
+		new Translator("tables/2");
+		new Translator("tables/3");
+		new Translator("tables/4");
+		new Translator("tables/5");
+		new Translator("tables/6");
+	}
+	
 	@SuppressWarnings("unchecked")
 	public TableResolverTest() {
 		final File testRootDir = new File(this.getClass().getResource("/").getPath());
@@ -44,7 +54,7 @@ public class TableResolverTest {
 				public File[] invoke(String table, File base) {
 					if (table == null)
 						return null;
-					File tableFile = new File(testRootDir, table);
+					File tableFile = new File(base != null ? base.getParentFile() : testRootDir, table);
 					if (tableFile.exists())
 						return new File[]{tableFile};
 					if (table.equals("<FOOBAR>"))
