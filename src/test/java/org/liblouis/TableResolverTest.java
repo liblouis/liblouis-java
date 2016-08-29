@@ -24,23 +24,24 @@ public class TableResolverTest {
 			translator.translate("foobar", null, null, null).getBraille());
 	}
 	
+	final TableResolver resolver;
+	
 	@SuppressWarnings("unchecked")
 	public TableResolverTest() {
 		Helper.setLibraryPath();
 		final File testRootDir = new File(this.getClass().getResource("/").getPath());
-		Louis.getLibrary().lou_registerTableResolver(
-			new TableResolver() {
-				public File[] invoke(String table, File base) {
-					if (table == null)
-						return null;
-					File tableFile = new File(testRootDir, table);
-					if (tableFile.exists())
-						return new File[]{tableFile};
-					if (table.equals("<FOOBAR>"))
-						return invoke("tables/foobar.cti", null);
+		resolver = new TableResolver() {
+			public File[] invoke(String table, File base) {
+				if (table == null)
 					return null;
-				}
+				File tableFile = new File(testRootDir, table);
+				if (tableFile.exists())
+					return new File[]{tableFile};
+				if (table.equals("<FOOBAR>"))
+					return invoke("tables/foobar.cti", null);
+				return null;
 			}
-		);
+		};
+		Louis.getLibrary().lou_registerTableResolver(resolver);
 	}
 }
