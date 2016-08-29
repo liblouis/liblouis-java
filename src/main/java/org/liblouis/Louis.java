@@ -56,8 +56,16 @@ public class Louis {
 		
 		public Pointer lou_getTable(String tableList);
 		
+		/**
+		 * Note that keeping resolver from being garbage collection is the
+		 * responsibility of the caller.
+		 */
 		public void lou_registerTableResolver(TableResolver resolver);
 		
+		/**
+		 * Note that keeping logger from being garbage collection is the
+		 * responsibility of the caller.
+		 */
 		public void lou_registerLogCallback(Logger logger);
 		
 		public void lou_setLogLevel(int level);
