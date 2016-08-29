@@ -2,13 +2,7 @@ package org.liblouis;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.PrintStream;
-import java.util.Collection;
-
-import static org.apache.commons.io.filefilter.FileFilterUtils.asFileFilter;
-import static org.apache.commons.io.filefilter.FileFilterUtils.trueFileFilter;
-import org.apache.commons.io.FileUtils;
 
 import org.junit.Test;
 
@@ -42,13 +36,7 @@ public class LoggerTest {
 	
 	@SuppressWarnings("unchecked")
 	public LoggerTest() {
-		final File testRootDir = new File(this.getClass().getResource("/").getPath());
-		Louis.setLibraryPath(((Collection<File>)FileUtils.listFiles(
-				new File(testRootDir, "../dependency"),
-				asFileFilter(new FilenameFilter() {
-					public boolean accept(File dir, String fileName) {
-						return dir.getName().equals("shared") && fileName.startsWith("liblouis"); }}),
-				trueFileFilter())).iterator().next());
+		Helper.setLibraryPath();
 		logger = new ByteArrayLogger() {
 			public String format(int level, String message) {
 				switch (level) {
