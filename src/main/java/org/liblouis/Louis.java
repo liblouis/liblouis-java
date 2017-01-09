@@ -21,16 +21,17 @@ public class Louis {
 		libraryPath = path;
 	}
 	
-	private static LouisLibrary instance;
+	private static LouisLibrary INSTANCE;
 	
 	public static LouisLibrary getLibrary() {
-		if (instance == null) {
+		if (INSTANCE == null) {
 			try {
 				String name = (libraryPath != null) ? libraryPath.getCanonicalPath() : "louis";
-				instance = (LouisLibrary)Native.loadLibrary(name, LouisLibrary.class); }
+				LouisLibrary unsynced = (LouisLibrary)Native.loadLibrary(name, LouisLibrary.class);
+				INSTANCE = (LouisLibrary)Native.synchronizedLibrary(unsynced); }
 			catch (IOException e) {
 				throw new RuntimeException("Could not load liblouis", e); }}
-		return instance;
+		return INSTANCE;
 	}
 	
 	public interface LouisLibrary extends Library {
