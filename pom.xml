@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.liblouis</groupId>
   <artifactId>liblouis-java</artifactId>
-  <version>3.0.1-SNAPSHOT</version>
+  <version>3.1.0</version>
   <packaging>bundle</packaging>
   <name>liblouis-java</name>
   <description>JNA based Java bindings to liblouis, an open-source braille translator and back-translator.</description>
