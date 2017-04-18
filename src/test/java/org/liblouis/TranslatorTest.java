@@ -10,13 +10,6 @@ import static org.liblouis.Utilities.Hyphenation.insertHyphens;
 
 public class TranslatorTest {
 	
-	@Test
-	public void testVersion() {
-		assertEquals(
-			"3.0.0",
-			Louis.getLibrary().lou_version());
-	}
-	
 	@Test(expected=CompilationException.class)
 	public void testCompileTable() throws Exception {
 		new Translator("unexisting_file");
