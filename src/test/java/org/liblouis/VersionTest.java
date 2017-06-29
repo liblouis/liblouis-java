@@ -8,7 +8,7 @@ public class VersionTest {
 	@Test
 	public void testVersion() {
 		assertEquals(
-			"3.0.0",
+			"3.2.0-1-SNAPSHOT",
 			Louis.getLibrary().lou_version());
 	}
 	
