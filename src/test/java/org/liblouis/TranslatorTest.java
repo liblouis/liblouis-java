@@ -97,9 +97,7 @@ public class TranslatorTest {
 	
 	private final File tablesDir;
 
-	@SuppressWarnings("unchecked")
 	public TranslatorTest() {
-		Helper.setLibraryPath();
 		File testRootDir = new File(this.getClass().getResource("/").getPath());
 		tablesDir = new File(testRootDir, "tables");
 	}

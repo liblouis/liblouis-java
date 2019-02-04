@@ -34,18 +34,21 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.liblouis</groupId>
+        <artifactId>louis</artifactId>
+        <version>3.6.0</version>
+        <type>nar</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>3.5.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.liblouis</groupId>
-      <artifactId>louis</artifactId>
-      <version>3.6.0</version>
-      <type>nar</type>
-      <scope>test</scope>
+      <version>5.2.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -63,37 +66,117 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.github.maven-nar</groupId>
-        <artifactId>nar-maven-plugin</artifactId>
-        <version>3.4.0</version>
-        <executions>
-          <execution>
-            <id>unpack-liblouis</id>
-            <phase>generate-test-resources</phase>
-            <goals>
-              <goal>nar-validate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
         <executions>
           <execution>
             <id>unpack-liblouis</id>
-            <phase>generate-test-resources</phase>
+            <phase>generate-resources</phase>
             <goals>
               <goal>unpack</goal>
             </goals>
             <configuration>
               <artifactItems>
+                <!--
+                    binaries
+                -->
                 <artifactItem>
                   <groupId>org.liblouis</groupId>
                   <artifactId>louis</artifactId>
-                  <classifier>${nar.aol}-shared</classifier>
+                  <classifier>i386-Linux-gpp-shared</classifier>
+                  <type>nar</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.liblouis</groupId>
+                  <artifactId>louis</artifactId>
+                  <classifier>amd64-Linux-gpp-shared</classifier>
+                  <type>nar</type>
+                </artifactItem>
+                <!--
+                <artifactItem>
+                  <groupId>org.liblouis</groupId>
+                  <artifactId>louis</artifactId>
+                  <classifier>i386-MacOSX-gpp-shared</classifier>
+                  <type>nar</type>
+                </artifactItem>
+                -->
+                <artifactItem>
+                  <groupId>org.liblouis</groupId>
+                  <artifactId>louis</artifactId>
+                  <classifier>x86_64-MacOSX-gpp-shared</classifier>
+                  <type>nar</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.liblouis</groupId>
+                  <artifactId>louis</artifactId>
+                  <classifier>i686-w64-mingw32-gpp-executable</classifier>
+                  <type>nar</type>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.liblouis</groupId>
+                  <artifactId>louis</artifactId>
+                  <classifier>x86_64-w64-mingw32-gpp-executable</classifier>
                   <type>nar</type>
                 </artifactItem>
               </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>add-resources</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>add-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <!--
+                    For MacOS include only 64-bit version because JNA only looks in one path, namely
+                    /darwin/liblouis.dylib. The alternative is to build a multi-architecture binary,
+                    or to check the architecture in Louis.java and specify an exact path in the JAR.
+                -->
+                <resource>
+                  <directory>target/dependency/lib/x86_64-MacOSX-gpp/shared</directory>
+                  <includes>
+                    <include>liblouis.dylib</include>
+                  </includes>
+                  <targetPath>darwin</targetPath>
+                </resource>
+                <resource>
+                  <directory>target/dependency/lib/i386-Linux-gpp/shared</directory>
+                  <includes>
+                    <include>liblouis.so</include>
+                  </includes>
+                  <targetPath>linux-x86</targetPath>
+                </resource>
+                <resource>
+                  <directory>target/dependency/lib/amd64-Linux-gpp/shared</directory>
+                  <includes>
+                    <include>liblouis.so</include>
+                  </includes>
+                  <targetPath>linux-x86-64</targetPath>
+                </resource>
+                <resource>
+                  <directory>target/dependency/bin/i686-w64-mingw32-gpp</directory>
+                  <includes>
+                    <include>liblouis.dll</include>
+                  </includes>
+                  <targetPath>win32-x86</targetPath>
+                </resource>
+                <resource>
+                  <directory>target/dependency/bin/x86_64-w64-mingw32-gpp</directory>
+                  <includes>
+                    <include>liblouis.dll</include>
+                  </includes>
+                  <targetPath>win32-x86-64</targetPath>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>

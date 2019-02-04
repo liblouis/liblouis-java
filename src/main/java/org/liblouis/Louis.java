@@ -17,6 +17,11 @@ public class Louis {
 	
 	private static File libraryPath = null;
 	
+	/**
+	 * To have any effect, this method needs to be called before any other method in Louis or
+	 * Translator is called. If no library path is provided, the binaries embedded inside this JAR
+	 * will be used.
+	 */
 	public static void setLibraryPath(File path) {
 		libraryPath = path;
 	}
@@ -25,12 +30,28 @@ public class Louis {
 	
 	public static LouisLibrary getLibrary() {
 		if (INSTANCE == null) {
+			// look for binaries inside this JAR first (by default this is done only as a last resort in JNA)
+			if (libraryPath == null) {
+				try {
+					libraryPath = Native.extractFromResourcePath("louis", Louis.class.getClassLoader()); }
+				catch (IOException e) {}
+			}
 			try {
 				String name = (libraryPath != null) ? libraryPath.getCanonicalPath() : "louis";
 				LouisLibrary unsynced = (LouisLibrary)Native.loadLibrary(name, LouisLibrary.class);
-				INSTANCE = (LouisLibrary)Native.synchronizedLibrary(unsynced); }
-			catch (IOException e) {
-				throw new RuntimeException("Could not load liblouis", e); }}
+				INSTANCE = (LouisLibrary)Native.synchronizedLibrary(unsynced);
+			} catch (IOException e) {
+				throw new RuntimeException("Could not load liblouis", e);
+			} finally {
+				// delete the binary if it was extracted by JNA
+				if (libraryPath != null && libraryPath.getName().startsWith("jna"))
+					if (!libraryPath.delete())
+						// mark for later removal by JNA
+						try {
+							new File(libraryPath.getParentFile(), libraryPath.getName() + ".x").createNewFile(); }
+						catch (IOException e) { /* ignore */ }
+			}
+		}
 		return INSTANCE;
 	}
 	

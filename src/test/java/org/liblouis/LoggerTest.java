@@ -1,7 +1,6 @@
 package org.liblouis;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.PrintStream;
 
 import org.junit.Test;
@@ -34,9 +33,7 @@ public class LoggerTest {
 	
 	private final ByteArrayLogger logger;
 	
-	@SuppressWarnings("unchecked")
 	public LoggerTest() {
-		Helper.setLibraryPath();
 		logger = new ByteArrayLogger() {
 			public String format(int level, String message) {
 				switch (level) {

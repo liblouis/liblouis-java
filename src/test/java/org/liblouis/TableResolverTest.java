@@ -26,9 +26,7 @@ public class TableResolverTest {
 	
 	final TableResolver resolver;
 	
-	@SuppressWarnings("unchecked")
 	public TableResolverTest() {
-		Helper.setLibraryPath();
 		final File testRootDir = new File(this.getClass().getResource("/").getPath());
 		resolver = new TableResolver() {
 			public File[] invoke(String table, File base) {

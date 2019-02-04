@@ -25,10 +25,8 @@ public class FindTranslatorTest {
 			Translator.find("locale:foo").translate("foobar", null, null, null).getBraille());
 	}
 	
-	@SuppressWarnings("unchecked")
 	public FindTranslatorTest() {
-		Helper.setLibraryPath();
-		File testRootDir = new File(Helper.class.getResource("/").getPath());
+		File testRootDir = new File(this.getClass().getResource("/").getPath());
 		File[] tables = new File(testRootDir, "tables").listFiles();
 		String[] tableNames = new String[tables.length];
 		for (int i = 0; i < tableNames.length; i++)
