@@ -78,6 +78,15 @@
             <configuration>
               <artifactItems>
                 <!--
+                    tables
+                -->
+                <artifactItem>
+                  <groupId>org.liblouis</groupId>
+                  <artifactId>louis</artifactId>
+                  <classifier>noarch</classifier>
+                  <type>nar</type>
+                </artifactItem>
+                <!--
                     binaries
                 -->
                 <artifactItem>
@@ -136,6 +145,10 @@
             </goals>
             <configuration>
               <resources>
+                <resource>
+                  <directory>target/dependency/share/liblouis/tables</directory>
+                  <targetPath>org/liblouis/resource-files/tables</targetPath>
+                </resource>
                 <!--
                     For MacOS include only 64-bit version because JNA only looks in one path, namely
                     /darwin/liblouis.dylib. The alternative is to build a multi-architecture binary,

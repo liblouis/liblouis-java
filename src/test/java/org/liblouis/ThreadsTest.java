@@ -11,7 +11,8 @@ public class ThreadsTest {
 	@Test
 	public void testMultiThreaded() throws Exception {
 		final Translator translator1 = new Translator(new File(tablesDir, "foobar.cti").getCanonicalPath());
-		final Translator translator2 = new Translator(new File(tablesDir, "foobar.cti,foobar.dic").getCanonicalPath());
+		final Translator translator2 = new Translator(new File(tablesDir, "foobar.cti").getCanonicalPath() + "," +
+		                                              new File(tablesDir, "foobar.dic").getCanonicalPath());
 		final Random r1 = new Random();
 		final Random r2 = new Random();
 		final String alphabet = "abcdefghijklmnopqrstuvwxyz.   ";

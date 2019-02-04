@@ -78,7 +78,13 @@ public class TranslatorTest {
 	}
 	
 	private Translator newTranslator(String tables) throws IOException, CompilationException {
-		return new Translator(new File(tablesDir, tables).getCanonicalPath());
+		String[] subTables = tables.split(",");
+		for (int i = 0; i < subTables.length; i++)
+			subTables[i] = new File(tablesDir, subTables[i]).getCanonicalPath();
+		tables = subTables[0];
+		for (int i = 1; i < subTables.length; i++)
+			tables += ("," + subTables[i]);
+		return new Translator(tables);
 	}
 	
 	private byte[] intToByte(int [] array) {

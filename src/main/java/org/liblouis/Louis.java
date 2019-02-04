@@ -1,14 +1,19 @@
 package org.liblouis;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -166,7 +171,76 @@ public class Louis {
 						catch (IOException e) { /* ignore */ }
 			}
 		}
-		if (!tableResolverIsRegistered && lou_tableResolver != null) {
+		if (lou_tableResolver == null) {
+			// default table resolver implementation that looks for tables inside this JAR and falls back to the file system
+			setTableResolver(new TableResolver() {
+					private final Map<String,URL> tables;
+					private final Set<String> tablePaths; {
+						tables = new HashMap<String,URL>();
+						InputStream in = null;
+						BufferedReader br = null;
+						try {
+							in = Louis.class.getResourceAsStream("resource-files/tables/");
+							br = new BufferedReader(new InputStreamReader(in));
+							String table;
+							while ((table = br.readLine()) != null)
+								tables.put(table, Louis.class.getResource("resource-files/tables/" + table));
+						} catch (IOException e) {
+							throw new RuntimeException(e); // should not happen
+						} finally {
+							if (br != null) try { br.close(); } catch (IOException e) {}
+							else if (in != null) try { in.close(); } catch (IOException e) {}
+						}
+						tablePaths = Collections.unmodifiableSet(tables.keySet());
+					}
+					private final Map<String,URL> aggregatorTables = new HashMap<String,URL>();
+					public URL resolve(String table, URL base) {
+						// if we are resolving an include rule from a generated aggregator table, resolve without base
+						if (aggregatorTables.containsValue(base))
+							base = null;
+						if (base == null || tables.containsValue(base)) {
+							if (tables.containsKey(table))
+								return tables.get(table);
+						}
+						// if it is a comma separated table list, create a single file that includes all the sub-tables
+						if (base == null && table.contains(",")) {
+							if (aggregatorTables.containsKey(table))
+								return aggregatorTables.get(table);
+							StringBuilder b = new StringBuilder();
+							for (String s : table.split(","))
+								b.append("include ").append(s).append('\n');
+							InputStream in = new ByteArrayInputStream(b.toString().getBytes(StandardCharsets.UTF_8));
+							try {
+								File f = File.createTempFile("liblouis-java-", ".tbl");
+								f.delete();
+								Files.copy(in, f.toPath());
+								f.deleteOnExit();
+								URL u = asURL(f);
+								aggregatorTables.put(table, u);
+								return u;
+							} catch (IOException e) {
+								throw new RuntimeException(e); // should not happen
+							}
+						}
+						// try file system
+						if (base != null && base.toString().startsWith("file:")) {
+							File f = new File(asFile(base), table);
+							if (f.exists())
+								return asURL(f);
+						} else {
+							File f = new File(table);
+							if (f.exists())
+								return asURL(f);
+						}
+						return null; // table cannot be resolved
+					}
+					public Set<String> list() {
+						return tablePaths;
+					}
+				}
+			);
+		}
+		if (!tableResolverIsRegistered) {
 			INSTANCE.lou_registerTableResolver(lou_tableResolver);
 			Set<String> allFiles = tableResolver.list();
 			// only needed for Translator.find() but we do it anyway
