@@ -1,19 +1,35 @@
 package org.liblouis;
 
-import com.sun.jna.Callback;
+import java.util.HashMap;
+import java.util.Map;
 
-public interface Logger extends Callback {
+public interface Logger {
 	
-	public static abstract class Level {
-		public static final int ALL = -2147483648;
-		public static final int DEBUG = 10000;
-		public static final int INFO = 20000;
-		public static final int WARN = 30000;
-		public static final int ERROR = 40000;
-		public static final int FATAL = 50000;
-		public static final int OFF = 2147483647;
+	public void log(Level level, String message);
+	
+	public enum Level {
+		ALL(-2147483648),
+		DEBUG(10000),
+		INFO(20000),
+		WARN(30000),
+		ERROR(40000),
+		FATAL(50000),
+		OFF(2147483647);
+		private final int value;
+		private Level(int value) {
+			this.value = value;
+		}
+		int value() {
+			return value;
+		}
+		private static Map<Integer,Level> levels;
+		static Level from(int value) {
+			if (levels == null) {
+				levels = new HashMap<Integer,Level>();
+				for (Level l : values())
+					levels.put(l.value(), l);
+			}
+			return levels.get(value);
+		}
 	}
-	
-	public void invoke(int level, String message);
-	
 }

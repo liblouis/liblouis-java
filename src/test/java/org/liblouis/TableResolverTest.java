@@ -1,10 +1,14 @@
 package org.liblouis;
 
 import java.io.File;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Set;
 
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import static org.liblouis.Louis.asURL;
 
 public class TableResolverTest {
 	
@@ -24,22 +28,23 @@ public class TableResolverTest {
 			translator.translate("foobar", null, null, null).getBraille());
 	}
 	
-	final TableResolver resolver;
-	
 	public TableResolverTest() {
 		final File testRootDir = new File(this.getClass().getResource("/").getPath());
-		resolver = new TableResolver() {
-			public File[] invoke(String table, File base) {
-				if (table == null)
+		Louis.setTableResolver(new TableResolver() {
+				public URL resolve(String table, URL base) {
+					if (table == null)
+						return null;
+					File tableFile = new File(testRootDir, table);
+					if (tableFile.exists())
+						return asURL(tableFile);
+					if (table.equals("<FOOBAR>"))
+						return resolve("tables/foobar.cti", null);
 					return null;
-				File tableFile = new File(testRootDir, table);
-				if (tableFile.exists())
-					return new File[]{tableFile};
-				if (table.equals("<FOOBAR>"))
-					return invoke("tables/foobar.cti", null);
-				return null;
+				}
+				public Set<String> list() {
+					return Collections.emptySet();
+				}
 			}
-		};
-		Louis.getLibrary().lou_registerTableResolver(resolver);
+		);
 	}
 }

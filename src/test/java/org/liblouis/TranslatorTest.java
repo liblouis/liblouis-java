@@ -14,7 +14,7 @@ public class TranslatorTest {
 	public void testVersion() {
 		assertEquals(
 			"3.6.0",
-			Louis.getLibrary().lou_version());
+			Louis.getVersion());
 	}
 	
 	@Test(expected=CompilationException.class)

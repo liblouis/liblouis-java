@@ -1,5 +1,6 @@
 package org.liblouis;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,16 @@ public class Translator {
 		if (Louis.getLibrary().lou_getTable(table) == Pointer.NULL)
 			throw new CompilationException("Unable to compile table '" + table + "'");
 		this.table = table;
+	}
+	
+	/**
+	 * @param table The translation table as a URL.
+	 * @throws CompilationException if the table could not be compiled.
+	 */
+	public Translator(URL table) throws CompilationException {
+		this.table = Louis.getTableNameForURL(table);
+		if (Louis.getLibrary().lou_getTable(this.table) == Pointer.NULL)
+			throw new CompilationException("Unable to compile table '" + table + "'");
 	}
 	
 	/**

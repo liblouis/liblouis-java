@@ -7,12 +7,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-import static org.liblouis.Logger.Level.DEBUG;
-import static org.liblouis.Logger.Level.INFO;
-import static org.liblouis.Logger.Level.WARN;
-import static org.liblouis.Logger.Level.ERROR;
-import static org.liblouis.Logger.Level.FATAL;
-
 public class LoggerTest {
 	
 	@Test
@@ -25,7 +19,7 @@ public class LoggerTest {
 		             "[ERROR] unexisting_file could not be compiled"  + "\n",
 		             logger.toString());
 		logger.reset();
-		Louis.getLibrary().lou_setLogLevel(FATAL);
+		Louis.setLogLevel(Logger.Level.FATAL);
 		try { new Translator("unexisting_file"); }
 		catch (CompilationException e) {}
 		assertEquals("", logger.toString());
@@ -35,7 +29,7 @@ public class LoggerTest {
 	
 	public LoggerTest() {
 		logger = new ByteArrayLogger() {
-			public String format(int level, String message) {
+			public String format(Logger.Level level, String message) {
 				switch (level) {
 				case DEBUG: return "[DEBUG] " + message;
 				case INFO: return "[INFO] " + message;
@@ -45,14 +39,14 @@ public class LoggerTest {
 				return null;
 			}
 		};
-		Louis.getLibrary().lou_registerLogCallback(logger);
+		Louis.setLogger(logger);
 	}
 	
 	private abstract class ByteArrayLogger implements Logger {
 		private ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		private PrintStream printStream = new PrintStream(stream);
-		public abstract String format(int level, String message);
-		public void invoke(int level, String message) {
+		public abstract String format(Logger.Level level, String message);
+		public void log(Logger.Level level, String message) {
 			String formattedMessage = format(level, message);
 			if (formattedMessage != null)
 				printStream.println(formattedMessage);

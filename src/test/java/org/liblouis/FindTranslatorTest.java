@@ -1,10 +1,14 @@
 package org.liblouis;
 
 import java.io.File;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import static org.liblouis.Louis.asURL;
 
 public class FindTranslatorTest {
 	
@@ -27,10 +31,22 @@ public class FindTranslatorTest {
 	
 	public FindTranslatorTest() {
 		File testRootDir = new File(this.getClass().getResource("/").getPath());
-		File[] tables = new File(testRootDir, "tables").listFiles();
-		String[] tableNames = new String[tables.length];
-		for (int i = 0; i < tableNames.length; i++)
-			tableNames[i] = tables[i].getAbsolutePath();
-		Louis.getLibrary().lou_indexTables(tableNames);
+		final Set<String> tables = new HashSet<String>();
+		for (File f : new File(testRootDir, "tables").listFiles())
+			tables.add(f.getAbsolutePath());
+		Louis.setTableResolver(new TableResolver() {
+				public URL resolve(String table, URL base) {
+					if (table == null)
+						return null;
+					File tableFile = new File(table);
+					if (tableFile.exists())
+						return asURL(tableFile);
+					return null;
+				}
+				public Set<String> list() {
+					return tables;
+				}
+			}
+		);
 	}
 }
