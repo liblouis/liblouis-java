@@ -2,7 +2,9 @@ package org.liblouis;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
@@ -27,6 +29,15 @@ public class FindTranslatorTest {
 		assertEquals(
 			"foobar",
 			Translator.find("locale:foo").translate("foobar", null, null, null).getBraille());
+	}
+	
+	@Test
+	public void testListAvailableLocales() {
+		List<String> locales = new ArrayList<String>();
+		for (Table t : Louis.listTables())
+			locales.add(t.getInfo().get("locale"));
+		assertEquals(1, locales.size());
+		assertEquals("foo", locales.get(0));
 	}
 	
 	public FindTranslatorTest() {

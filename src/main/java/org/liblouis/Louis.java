@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -143,6 +144,16 @@ public class Louis {
 	 */
 	public static String getVersion() {
 		return getLibrary().lou_version();
+	}
+	
+	/**
+	 * Get a list of all the top-level tables.
+	 */
+	public static Set<Table> listTables() {
+		Set<Table> tables = new HashSet<Table>();
+		for (String t : getLibrary().lou_listTables())
+			tables.add(new Table(t));
+		return Collections.unmodifiableSet(tables);
 	}
 	
 	private static LouisLibrary INSTANCE;
@@ -291,6 +302,10 @@ public class Louis {
 		public int lou_indexTables(String[] tables);
 		
 		public String lou_findTable(String query);
+		
+		public String lou_getTableInfo(String table, String key);
+		
+		public String[] lou_listTables();
 		
 		public void _lou_logMessage(int level, String... format);
 		
