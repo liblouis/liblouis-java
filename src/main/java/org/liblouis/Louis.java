@@ -23,6 +23,7 @@ import com.sun.jna.Callback;
 import com.sun.jna.DefaultTypeMapper;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
+import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.StringArray;
@@ -163,7 +164,10 @@ public class Louis {
 			// look for binaries inside this JAR first (by default this is done only as a last resort in JNA)
 			if (libraryPath == null) {
 				try {
-					libraryPath = Native.extractFromResourcePath("louis", Louis.class.getClassLoader()); }
+					libraryPath = Native.extractFromResourcePath(
+						Platform.isWindows() ? "liblouis" : "louis", // otherwise we have to rename the DLL files which
+						                                             // is not so easy to do in Maven
+						Louis.class.getClassLoader()); }
 				catch (IOException e) {}
 			}
 			try {
@@ -219,7 +223,7 @@ public class Louis {
 								return aggregatorTables.get(table);
 							StringBuilder b = new StringBuilder();
 							for (String s : table.split(","))
-								b.append("include ").append(s).append('\n');
+								b.append("include ").append(s.replaceAll("\\\\", "\\\\\\\\")).append('\n');
 							InputStream in = new ByteArrayInputStream(b.toString().getBytes(StandardCharsets.UTF_8));
 							try {
 								File f = File.createTempFile("liblouis-java-", ".tbl");

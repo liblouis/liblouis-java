@@ -14,9 +14,9 @@ public class LoggerTest {
 		logger.reset();
 		try { new Translator("unexisting_file"); }
 		catch (CompilationException e) {}
-		assertEquals("[ERROR] Cannot resolve table 'unexisting_file'" + "\n" +
-		             "[ERROR] 1 errors found."                        + "\n" +
-		             "[ERROR] unexisting_file could not be compiled"  + "\n",
+		assertEquals("[ERROR] Cannot resolve table 'unexisting_file'" + System.getProperty("line.separator") +
+		             "[ERROR] 1 errors found."                        + System.getProperty("line.separator") +
+		             "[ERROR] unexisting_file could not be compiled"  + System.getProperty("line.separator"),
 		             logger.toString());
 		logger.reset();
 		Louis.setLogLevel(Logger.Level.FATAL);
