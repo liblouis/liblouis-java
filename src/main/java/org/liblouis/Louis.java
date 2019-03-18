@@ -272,10 +272,10 @@ public class Louis {
 		}
 		if (!tableResolverIsRegistered) {
 			INSTANCE.lou_registerTableResolver(lou_tableResolver);
+			tableResolverIsRegistered = true;
 			Set<String> allFiles = tableResolver.list();
 			// only needed for Translator.find() but we do it anyway
 			INSTANCE.lou_indexTables(allFiles.toArray(new String[allFiles.size()]));
-			tableResolverIsRegistered = true;
 		}
 		if (!loggerIsRegistered && lou_logCallback != null) {
 			INSTANCE.lou_registerLogCallback(lou_logCallback);
