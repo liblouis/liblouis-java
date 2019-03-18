@@ -1,5 +1,7 @@
 package org.liblouis;
 
+import java.io.IOException;
+
 import com.sun.jna.ptr.IntByReference;
 
 public class TranslationResult {
@@ -11,7 +13,10 @@ public class TranslationResult {
 	protected TranslationResult(WideString outbuf, IntByReference outlen, int[] inputPos,
 	                            int[] characterAttributes, int[] interCharacterAttributes) {
 		int len = outlen.getValue();
-		this.braille = outbuf.read(len);
+		try {
+			this.braille = outbuf.read(len); }
+		catch (IOException e) {
+			throw new RuntimeException("should not happen", e); }
 		if (characterAttributes != null) {
 			this.characterAttributes = new int[len];
 			for (int outpos = 0; outpos < len; outpos++)

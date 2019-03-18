@@ -1,5 +1,6 @@
 package org.liblouis;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -91,7 +92,11 @@ public class Translator {
 		if (interCharacterAttributes != null)
 			if (interCharacterAttributes.length != text.length() - 1)
 				throw new IllegalArgumentException("interCharacterAttributes length must be equal to text length minus 1");
-		WideString inbuf = getWideCharBuffer("text-in", text.length()).write(text);
+		WideString inbuf;
+		try {
+			inbuf = getWideCharBuffer("text-in", text.length()).write(text); }
+		catch (IOException e) {
+			throw new RuntimeException("should not happen", e); }
 		WideString outbuf = getWideCharBuffer("text-out", text.length() * OUTLEN_MULTIPLIER);
 		IntByReference inlen = new IntByReference(text.length());
 		IntByReference outlen = new IntByReference(outbuf.length());
@@ -107,8 +112,11 @@ public class Translator {
 	}
 	
 	public String backTranslate(String text) throws TranslationException {
-		
-		WideString inbuf = getWideCharBuffer("text-in", text.length()).write(text);
+		WideString inbuf;
+		try {
+			inbuf = getWideCharBuffer("text-in", text.length()).write(text); }
+		catch (IOException e) {
+			throw new RuntimeException("should not happen", e); }
 		WideString outbuf = getWideCharBuffer("text-out", text.length() * OUTLEN_MULTIPLIER);
 		IntByReference inlen = new IntByReference(text.length());
 		IntByReference outlen = new IntByReference(outbuf.length());
@@ -116,8 +124,10 @@ public class Translator {
 		if (Louis.getLibrary().lou_backTranslate(table, inbuf, inlen, outbuf, outlen,
 				null, null, null, null, null, 0) == 0)
 			throw new TranslationException("Unable to complete translation");
-		
-		return outbuf.read(outlen.getValue());
+		try {
+			return outbuf.read(outlen.getValue()); }
+		catch (IOException e) {
+			throw new RuntimeException("should not happen", e); }
 	}
 	
 	/**
@@ -127,7 +137,11 @@ public class Translator {
 	 *         after hard hyphens). Length is equal to the <code>text</code> length minus 1.
 	 */
 	public byte[] hyphenate(String text) throws TranslationException {
-		WideString inbuf = getWideCharBuffer("text-in", text.length()).write(text);
+		WideString inbuf;
+		try {
+			inbuf = getWideCharBuffer("text-in", text.length()).write(text); }
+		catch (IOException e) {
+			throw new RuntimeException("should not happen", e); }
 		int inlen = text.length();
 		byte[] hyphens = getByteBuffer("hyphens-out", inlen);
 		for (int i = 0; i < inlen; i++) hyphens[i] = '0';
@@ -152,13 +166,24 @@ public class Translator {
 		return hyphenPositions;
 	}
 	
+	/**
+	 * Convert a braille string from either Unicode braille or Liblouis' dotsIO format to the
+	 * charset defined by the (display) table.
+	 */
 	public String display(String braille) throws TranslationException {
-		WideString inbuf = getWideCharBuffer("text-in", braille.length()).write(braille);
+		WideString inbuf;
+		try {
+			inbuf = getWideCharBuffer("text-in", braille.length()).write(braille); }
+		catch (IOException e) {
+			throw new RuntimeException("should not happen", e); }
 		int length = braille.length();
 		WideString outbuf = getWideCharBuffer("text-out", braille.length() * OUTLEN_MULTIPLIER);
 		if (Louis.getLibrary().lou_dotsToChar(table, inbuf, outbuf, length, 0) == 0)
 			throw new TranslationException("Unable to complete translation");
-		return outbuf.read(length);
+		try {
+			return outbuf.read(length); }
+		catch (IOException e) {
+			throw new RuntimeException("should not happen", e); }
 	}
 	
 	/*
@@ -166,7 +191,7 @@ public class Translator {
 	 * the maximum output length. This default will handle the case where
 	 * every input character is undefined in the translation table.
 	 */
-	private static final int OUTLEN_MULTIPLIER = WideChar.Constants.CHARSIZE * 2 + 4;
+	private static final int OUTLEN_MULTIPLIER = WideChar.SIZE * 2 + 4;
 	
 	private static Map<String,WideString> WIDECHAR_BUFFERS = new HashMap<String,WideString>();
 	private static Map<String,byte[]> BYTE_BUFFERS = new HashMap<String,byte[]>();
