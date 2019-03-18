@@ -23,4 +23,14 @@ public class DefaultTablesTest {
 			locales.add(t.getInfo().get("locale"));
 		assertEquals(86, locales.size());
 	}
+	
+	@Test
+	public void testCompileAllTables() throws CompilationException {
+		int count = 0;
+		for (Table t : Louis.listTables()) {
+			t.getTranslator();
+			count++;
+		}
+		assertEquals(133, count);
+	}
 }
