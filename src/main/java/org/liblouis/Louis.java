@@ -97,6 +97,10 @@ public class Louis {
 					if (base == null)
 						baseURL = null;
 					else {
+						try {
+							base = base.getCanonicalFile(); }
+						catch (IOException e) {
+							throw new RuntimeException(e); }
 						baseURL = tablesStoredToFileInv.get(base);
 						if (baseURL == null)
 							baseURL = asURL(base);
@@ -131,6 +135,10 @@ public class Louis {
 							} finally {
 								if (in != null) try { in.close(); } catch (IOException e) {}
 							}
+							try {
+								tableFile = tableFile.getCanonicalFile(); }
+							catch (IOException e) {
+								throw new RuntimeException(e); }
 							tablesStoredToFile.put(tableURL, tableFile);
 							tablesStoredToFileInv.put(tableFile, tableURL);
 						}
