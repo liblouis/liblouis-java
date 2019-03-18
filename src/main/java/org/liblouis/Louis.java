@@ -12,10 +12,25 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.BasicFileAttributeView;
+import static java.nio.file.Files.walkFileTree;
 import java.nio.file.Files;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.SimpleFileVisitor;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -195,20 +210,8 @@ public class Louis {
 					private final Map<String,URL> tables;
 					private final Set<String> tablePaths; {
 						tables = new HashMap<String,URL>();
-						InputStream in = null;
-						BufferedReader br = null;
-						try {
-							in = Louis.class.getResourceAsStream("resource-files/tables/");
-							br = new BufferedReader(new InputStreamReader(in));
-							String table;
-							while ((table = br.readLine()) != null)
-								tables.put(table, Louis.class.getResource("resource-files/tables/" + table));
-						} catch (IOException e) {
-							throw new RuntimeException(e); // should not happen
-						} finally {
-							if (br != null) try { br.close(); } catch (IOException e) {}
-							else if (in != null) try { in.close(); } catch (IOException e) {}
-						}
+						for (String table : listResources("org/liblouis/resource-files/tables"))
+							tables.put(table, Louis.class.getResource("resource-files/tables/" + table));
 						tablePaths = Collections.unmodifiableSet(tables.keySet());
 						logger.debug("Using default tables: " + tablePaths);
 					}
@@ -368,15 +371,9 @@ public class Louis {
 	
 	private static File asFile(URL url) throws IllegalArgumentException {
 		try {
-			URI uri; {
-				if (url.getProtocol().equals("jar"))
-					uri = new URI("jar:" + new URI(null, url.getAuthority(), url.getPath(), url.getQuery(), url.getRef()).toASCIIString());
-				String authority = (url.getPort() != -1) ?
-					url.getHost() + ":" + url.getPort() :
-					url.getHost();
-				uri = new URI(url.getProtocol(), authority, url.getPath(), url.getQuery(), url.getRef());
-			}
-			return new File(uri);
+			if (!"file".equals(url.getProtocol()))
+				throw new RuntimeException("expected file URL");
+			return new File(new URI("file", url.getPath(), null));
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e); // should not happen
 		}
@@ -391,6 +388,61 @@ public class Louis {
 			throw new RuntimeException(e); // should not happen
 		} catch (IOException e) {
 			throw new RuntimeException(e); // should not happen
+		}
+	}
+	
+	private static Iterable<String> listResources(final String directory) {
+		File jarFile = asFile(Louis.class.getProtectionDomain().getCodeSource().getLocation());
+		if (!jarFile.exists())
+			throw new RuntimeException();
+		else if (jarFile.isDirectory()) {
+			File d = new File(jarFile, directory);
+			if (!d.exists())
+				throw new RuntimeException("directory does not exist");
+			else if (!d.isDirectory())
+				throw new RuntimeException("is not a directory");
+			else {
+				List<String> resources = new ArrayList<String>();
+				for (File f : d.listFiles())
+					resources.add(f.getName() + (f.isDirectory() ? "/" : ""));
+				return resources; }}
+		else {
+			FileSystem fs; {
+				try {
+					fs = FileSystems.newFileSystem(URI.create("jar:" + jarFile.toURI()),
+					                               Collections.<String,Object>emptyMap()); }
+				catch (IOException e) {
+					throw new RuntimeException(e); }}
+			try {
+				Path d = fs.getPath("/" + directory);
+				BasicFileAttributes a; {
+					try {
+						a = Files.getFileAttributeView(d, BasicFileAttributeView.class).readAttributes(); }
+					catch (NoSuchFileException e) {
+						throw new RuntimeException("directory does not exist"); }
+					catch (FileSystemNotFoundException e) {
+						throw new RuntimeException(e); }
+					catch (IOException e) {
+						throw new RuntimeException(e); }}
+				if (!a.isDirectory())
+					throw new RuntimeException("is not a directory");
+				final List<String> resources = new ArrayList<String>();
+				try {
+					walkFileTree(d, EnumSet.noneOf(FileVisitOption.class), 1, new SimpleFileVisitor<Path>() {
+							public FileVisitResult visitFile(Path f, BasicFileAttributes _) throws IOException {
+								resources.add(""+f.getFileName());
+								return FileVisitResult.CONTINUE; }}); }
+				catch (NoSuchFileException e) {
+					throw new RuntimeException(e); }
+				catch (IOException e) {
+					throw new RuntimeException(e); }
+				return resources; }
+			finally {
+				try {
+					fs.close(); }
+				catch (IOException e) {
+					throw new RuntimeException(e); }
+			}
 		}
 	}
 	
