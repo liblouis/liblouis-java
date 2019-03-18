@@ -10,11 +10,20 @@ public class TranslationResult {
 	private int[] characterAttributes = null;
 	private int[] interCharacterAttributes = null;
 	
-	protected TranslationResult(WideString outbuf, IntByReference outlen, int[] inputPos,
-	                            int[] characterAttributes, int[] interCharacterAttributes) {
+	TranslationResult(WideString outbuf, IntByReference outlen, int[] inputPos,
+	                  int[] characterAttributes, int[] interCharacterAttributes,
+	                  DisplayTable displayTable) {
 		int len = outlen.getValue();
 		try {
-			this.braille = outbuf.read(len); }
+			switch (displayTable) {
+			case DEFAULT:
+				this.braille = outbuf.read(len);
+				break;
+			case UNICODE:
+				this.braille = outbuf.readDots(len);
+				break;
+			default:
+				throw new RuntimeException(); }}
 		catch (IOException e) {
 			throw new RuntimeException("should not happen", e); }
 		if (characterAttributes != null) {

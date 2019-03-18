@@ -72,6 +72,7 @@ public class Translator {
 	 *                                 point opportunity, `1` for soft hyphen and `2` for zero-width
 	 *                                 space). Length must be equal to the <code>text</code> length
 	 *                                 minus 1.
+	 * @param displayTable The display table used to encode the braille.
 	 * @return A TranslationResult containing the braille translation, the output character
 	 *         attributes (or <code>null</code> if <code>characterAttributes</code> was
 	 *         <code>null</code>), and the output inter-character attributes (or <code>null</code>
@@ -82,6 +83,15 @@ public class Translator {
 	                                   short[] typeform,
 	                                   int[] characterAttributes,
 	                                   int[] interCharacterAttributes)
+			throws TranslationException {
+		return translate(text, typeform, characterAttributes, interCharacterAttributes, DisplayTable.DEFAULT);
+	}
+	
+	public TranslationResult translate(String text,
+	                                   short[] typeform,
+	                                   int[] characterAttributes,
+	                                   int[] interCharacterAttributes,
+	                                   DisplayTable displayTable)
 			throws TranslationException {
 		if (typeform != null)
 			if (typeform.length != text.length())
@@ -105,10 +115,11 @@ public class Translator {
 			typeform = Arrays.copyOf(typeform, outbuf.length());
 		if (characterAttributes != null || interCharacterAttributes != null)
 			inputPos = getIntegerBuffer("inputpos", text.length() * OUTLEN_MULTIPLIER);
+		int mode = displayTable != DisplayTable.DEFAULT ? 4 : 0;
 		if (Louis.getLibrary().lou_translate(table, inbuf, inlen, outbuf, outlen, typeform,
-		                                     null, null, inputPos, null, 0) == 0)
+		                                     null, null, inputPos, null, mode) == 0)
 			throw new TranslationException("Unable to complete translation");
-		return new TranslationResult(outbuf, outlen, inputPos, characterAttributes, interCharacterAttributes);
+		return new TranslationResult(outbuf, outlen, inputPos, characterAttributes, interCharacterAttributes, displayTable);
 	}
 	
 	public String backTranslate(String text) throws TranslationException {

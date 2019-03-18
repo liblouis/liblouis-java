@@ -19,6 +19,8 @@ public final class WideString extends PointerType implements NativeMapped {
 	
 	private static CharsetEncoder ENCODER;
 	private static CharsetDecoder DECODER;
+	private static CharsetEncoder DOTSIO_ENCODER;
+	private static CharsetDecoder DOTSIO_DECODER;
 	
 	private final int length;
 	
@@ -31,12 +33,15 @@ public final class WideString extends PointerType implements NativeMapped {
 		// can not be put in a static block
 		if (ENCODER == null) {
 			Charset charset;
+			Charset dotsIOCharset;
 			switch (WideChar.SIZE) {
 			case 2:
 				charset = Encodings.UTF_16LE.asCharset();
+				dotsIOCharset = Encodings.DOTSIO_16.asCharset();
 				break;
 			case 4:
 				charset = Encodings.UTF_32LE.asCharset();
+				dotsIOCharset = Encodings.DOTSIO_32.asCharset();
 				break;
 			default:
 				throw new RuntimeException();
@@ -45,6 +50,10 @@ public final class WideString extends PointerType implements NativeMapped {
 			                              .onUnmappableCharacter(CodingErrorAction.REPORT);
 			DECODER = charset.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
 			                              .onUnmappableCharacter(CodingErrorAction.REPORT);
+			DOTSIO_ENCODER = dotsIOCharset.newEncoder().onMalformedInput(CodingErrorAction.REPORT)
+			                                           .onUnmappableCharacter(CodingErrorAction.REPORT);
+			DOTSIO_DECODER = dotsIOCharset.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
+			                                           .onUnmappableCharacter(CodingErrorAction.REPORT);
 		}
 	}
 	
@@ -70,7 +79,23 @@ public final class WideString extends PointerType implements NativeMapped {
 	 * @throws IOException if length exceeds the maximum number of characters in this string
 	 */
 	String read(int length) throws CharacterCodingException, IOException {
-		synchronized (DECODER) {
+		return read(length, DECODER);
+	}
+	
+	/**
+	 * Read as braille string (dotsIO mode)
+	 *
+	 * @param length The number of characters (braille cells) to read
+	 * @return The Unicode braille Java string
+	 * @throws CharacterCodingException if the string can not be decoded
+	 * @throws IOException if length exceeds the maximum number of characters in this string
+	 */
+	String readDots(int length) throws CharacterCodingException, IOException {
+		return read(length, DOTSIO_DECODER);
+	}
+	
+	private String read(int length, CharsetDecoder decoder) throws CharacterCodingException, IOException {
+		synchronized (decoder) {
 			if (length > length())
 				throw new IOException("Maximum length is " + length());
 			// using CharsetDecoder because behavior of String(byte[]) is undefined when bytes can not be decoded
@@ -79,11 +104,11 @@ public final class WideString extends PointerType implements NativeMapped {
 				byte[] ba = getPointer().getByteArray(0, length * WideChar.SIZE);
 				ByteBuffer bb = ByteBuffer.wrap(ba);
 				CharBuffer cb = CharBuffer.wrap(ca);
-				DECODER.reset();
-				CoderResult cr = DECODER.decode(bb, cb, true);
+				decoder.reset();
+				CoderResult cr = decoder.decode(bb, cb, true);
 				if (!cr.isUnderflow())
 					cr.throwException();
-				cr = DECODER.flush(cb);
+				cr = decoder.flush(cb);
 				if (!cr.isUnderflow())
 					cr.throwException();
 				if (cb.hasRemaining())
@@ -102,7 +127,24 @@ public final class WideString extends PointerType implements NativeMapped {
 	 * @throws IOException if the supplied value is longer than the available space
 	 */
 	WideString write(String value) throws CharacterCodingException, IOException {
-		synchronized (ENCODER) {
+		return write(value, ENCODER);
+	}
+	
+	/**
+	 * Write as braille string (dotsIO mode)
+	 *
+	 * @param value The Unicode braille Java string to write
+	 * @return This object
+	 * @throws CharacterCodingException if the supplied value is not Unicode braille (contains
+	 *                                  characters outside of the 2800-28FF range)
+	 * @throws IOException if the supplied value is longer than the available space
+	 */
+	WideString writeDots(String value) throws CharacterCodingException, IOException {
+		return write(value, DOTSIO_ENCODER);
+	}
+	
+	private WideString write(String value, CharsetEncoder encoder) throws CharacterCodingException, IOException {
+		synchronized (encoder) {
 			if (value.length() > length)
 				throw new IOException("Maximum string length is " + length());
 			// using CharsetEncoder because behavior of String.getBytes() is undefined when characters can not be encoded
@@ -110,11 +152,11 @@ public final class WideString extends PointerType implements NativeMapped {
 			if (ba.length > 0) {
 				ByteBuffer bb = ByteBuffer.wrap(ba);
 				CharBuffer cb = CharBuffer.wrap(value);
-				ENCODER.reset();
-				CoderResult cr = ENCODER.encode(cb, bb, true);
+				encoder.reset();
+				CoderResult cr = encoder.encode(cb, bb, true);
 				if (!cr.isUnderflow())
 					cr.throwException();
-				cr = ENCODER.flush(bb);
+				cr = encoder.flush(bb);
 				if (!cr.isUnderflow())
 					cr.throwException();
 				if (bb.hasRemaining())

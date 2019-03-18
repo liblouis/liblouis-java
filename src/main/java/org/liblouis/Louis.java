@@ -199,7 +199,7 @@ public class Louis {
 				String name = (libraryPath != null) ? libraryPath.getCanonicalPath() : "louis";
 				LouisLibrary unsynced = (LouisLibrary)Native.loadLibrary(name, LouisLibrary.class);
 				INSTANCE = (LouisLibrary)Native.synchronizedLibrary(unsynced);
-				logger.debug("Loaded " + name + ": Liblouis v" + INSTANCE.lou_version());
+				logger.debug("Loaded " + name + ": Liblouis v" + INSTANCE.lou_version() + " (UCS" + INSTANCE.lou_charSize() + ")");
 			} catch (IOException e) {
 				throw new RuntimeException("Could not load liblouis", e);
 			} finally {

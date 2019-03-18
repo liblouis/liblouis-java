@@ -77,6 +77,14 @@ public class TranslatorTest {
 			translator.translate("foobar", new short[]{1,1,1,1,1,1}, null, null).getBraille());
 	}
 	
+	@Test
+	public void testDotsIO() throws Exception {
+		Translator translator = newTranslator("foobar.cti");
+		assertEquals(
+			"⠋⠕⠕⠃⠁⠗",
+			translator.translate("foobar", null, null, null, DisplayTable.UNICODE).getBraille());
+	}
+	
 	private Translator newTranslator(String tables) throws IOException, CompilationException {
 		String[] subTables = tables.split(",");
 		for (int i = 0; i < subTables.length; i++)
