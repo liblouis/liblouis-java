@@ -32,6 +32,8 @@ import com.sun.jna.ToNativeContext;
 import com.sun.jna.TypeConverter;
 import com.sun.jna.TypeMapper;
 
+import org.slf4j.LoggerFactory;
+
 public class Louis {
 	
 	private static File libraryPath = null;
@@ -174,6 +176,7 @@ public class Louis {
 				String name = (libraryPath != null) ? libraryPath.getCanonicalPath() : "louis";
 				LouisLibrary unsynced = (LouisLibrary)Native.loadLibrary(name, LouisLibrary.class);
 				INSTANCE = (LouisLibrary)Native.synchronizedLibrary(unsynced);
+				logger.debug("Loaded " + name + ": Liblouis v" + INSTANCE.lou_version());
 			} catch (IOException e) {
 				throw new RuntimeException("Could not load liblouis", e);
 			} finally {
@@ -207,6 +210,7 @@ public class Louis {
 							else if (in != null) try { in.close(); } catch (IOException e) {}
 						}
 						tablePaths = Collections.unmodifiableSet(tables.keySet());
+						logger.debug("Using default tables: " + tablePaths);
 					}
 					private final Map<String,URL> aggregatorTables = new HashMap<String,URL>();
 					public URL resolve(String table, URL base) {
@@ -389,4 +393,7 @@ public class Louis {
 			throw new RuntimeException(e); // should not happen
 		}
 	}
+	
+	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Louis.class);
+	
 }
