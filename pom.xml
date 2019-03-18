@@ -221,6 +221,34 @@
           </archive>
         </configuration>
       </plugin>
+      <!--
+          run the same tests but from another project
+      -->
+      <plugin>
+        <artifactId>maven-invoker-plugin</artifactId>
+        <version>1.8</version>
+        <configuration>
+          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+          <settingsFile>src/it/settings.xml</settingsFile>
+          <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+          <properties>
+            <liblouis-java.version>${project.version}</liblouis-java.version>
+            <liblouis-java.basedir>${project.basedir}</liblouis-java.basedir>
+          </properties>
+          <goals>
+            <goal>test</goal>
+          </goals>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>install</goal>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <profiles>
