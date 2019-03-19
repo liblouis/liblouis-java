@@ -43,3 +43,5 @@ sign / 34
 emphclass italic
 begemph italic 34
 endemph italic 34
+
+space \t 9

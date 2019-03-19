@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.liblouis.DisplayTable.StandardDisplayTables;
 import org.liblouis.Louis.LouisLibrary;
 
 import com.sun.jna.Pointer;
@@ -78,13 +79,14 @@ public class Translator {
 	 *         <code>null</code>), and the output inter-character attributes (or <code>null</code>
 	 *         if <code>interCharacterAttributes</code> was <code>null</code>).
 	 * @throws TranslationException if the translation could not be completed.
+	 * @throws DisplayException if the braille could not be encoded (due to virtual dots).
 	 */
 	public TranslationResult translate(String text,
 	                                   short[] typeform,
 	                                   int[] characterAttributes,
 	                                   int[] interCharacterAttributes)
-			throws TranslationException {
-		return translate(text, typeform, characterAttributes, interCharacterAttributes, DisplayTable.DEFAULT);
+			throws TranslationException, DisplayException {
+		return translate(text, typeform, characterAttributes, interCharacterAttributes, StandardDisplayTables.DEFAULT);
 	}
 	
 	public TranslationResult translate(String text,
@@ -92,7 +94,7 @@ public class Translator {
 	                                   int[] characterAttributes,
 	                                   int[] interCharacterAttributes,
 	                                   DisplayTable displayTable)
-			throws TranslationException {
+			throws TranslationException, DisplayException {
 		if (typeform != null)
 			if (typeform.length != text.length())
 				throw new IllegalArgumentException("typeform length must be equal to text length");
@@ -115,7 +117,7 @@ public class Translator {
 			typeform = Arrays.copyOf(typeform, outbuf.length());
 		if (characterAttributes != null || interCharacterAttributes != null)
 			inputPos = getIntegerBuffer("inputpos", text.length() * OUTLEN_MULTIPLIER);
-		int mode = displayTable != DisplayTable.DEFAULT ? 4 : 0;
+		int mode = displayTable != StandardDisplayTables.DEFAULT ? 4 : 0;
 		if (Louis.getLibrary().lou_translate(table, inbuf, inlen, outbuf, outlen, typeform,
 		                                     null, null, inputPos, null, mode) == 0)
 			throw new TranslationException("Unable to complete translation");

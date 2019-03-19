@@ -22,6 +22,8 @@ public class ThreadsTest {
 					try {
 						translator1.translate(generateString(r1, alphabet, r2.nextInt(100)), null, null, null); }
 					catch (TranslationException e) {
+						throw new RuntimeException(e); }
+					catch (DisplayException e) {
 						throw new RuntimeException(e); }}}};
 		Thread t2 = new Thread() {
 			public void run() {
@@ -29,6 +31,8 @@ public class ThreadsTest {
 					try {
 						translator2.translate(generateString(r1, alphabet, r2.nextInt(100)), null, null, null); }
 					catch (TranslationException e) {
+						throw new RuntimeException(e); }
+					catch (DisplayException e) {
 						throw new RuntimeException(e); }}}};
 		t1.start();
 		t2.start();

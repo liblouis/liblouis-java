@@ -6,6 +6,7 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
+import org.liblouis.DisplayTable.StandardDisplayTables;
 import static org.liblouis.Utilities.Hyphenation.insertHyphens;
 
 public class TranslatorTest {
@@ -82,7 +83,26 @@ public class TranslatorTest {
 		Translator translator = newTranslator("foobar.cti");
 		assertEquals(
 			"⠋⠕⠕⠃⠁⠗",
-			translator.translate("foobar", null, null, null, DisplayTable.UNICODE).getBraille());
+			translator.translate("foobar", null, null, null, StandardDisplayTables.UNICODE).getBraille());
+	}
+
+	@Test(expected=DisplayException.class)
+	public void testDecodingError() throws Exception {
+		Translator translator = newTranslator("foobar.cti");
+		assertEquals(
+			"⠋⠕⠕⠀⠃⠁⠗",
+			translator.translate("foo\tbar", null, null, null, StandardDisplayTables.UNICODE).getBraille());
+	}
+	
+	@Test
+	public void testDotsIOFallback() throws Exception {
+		Translator translator = newTranslator("foobar.cti");
+		assertEquals(
+			"⠋⠕⠕⠀⠃⠁⠗",
+			translator.translate(
+				"foo\tbar", null, null, null,
+				new DisplayTable.UnicodeBrailleDisplayTable(DisplayTable.Fallback.MASK)
+			).getBraille());
 	}
 	
 	private Translator newTranslator(String tables) throws IOException, CompilationException {

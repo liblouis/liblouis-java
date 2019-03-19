@@ -1,6 +1,7 @@
 package org.liblouis;
 
 import java.io.IOException;
+import java.nio.charset.UnmappableCharacterException;
 
 import com.sun.jna.ptr.IntByReference;
 
@@ -12,18 +13,12 @@ public class TranslationResult {
 	
 	TranslationResult(WideString outbuf, IntByReference outlen, int[] inputPos,
 	                  int[] characterAttributes, int[] interCharacterAttributes,
-	                  DisplayTable displayTable) {
+	                  DisplayTable displayTable) throws DisplayException {
 		int len = outlen.getValue();
 		try {
-			switch (displayTable) {
-			case DEFAULT:
-				this.braille = outbuf.read(len);
-				break;
-			case UNICODE:
-				this.braille = outbuf.readDots(len);
-				break;
-			default:
-				throw new RuntimeException(); }}
+			this.braille = outbuf.read(len, displayTable); }
+		catch (UnmappableCharacterException e) {
+			throw new DisplayException("virtual dots present in output", e); }
 		catch (IOException e) {
 			throw new RuntimeException("should not happen", e); }
 		if (characterAttributes != null) {
