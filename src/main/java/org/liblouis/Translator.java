@@ -27,6 +27,7 @@ public class Translator {
 	 * could not be compiled.
 	 */
 	public Translator(String table) throws CompilationException {
+		Louis.log(Logger.Level.DEBUG, "Loading table %s", table);
 		if (Louis.getLibrary().lou_getTable(table) == Pointer.NULL)
 			throw new CompilationException("Unable to compile table '" + table + "'");
 		this.table = table;
@@ -37,6 +38,7 @@ public class Translator {
 	 * @throws CompilationException if the table could not be compiled.
 	 */
 	public Translator(URL table) throws CompilationException {
+		Louis.log(Logger.Level.DEBUG, "Loading table %s", table);
 		this.table = Louis.getTableNameForURL(table);
 		if (Louis.getLibrary().lou_getTable(this.table) == Pointer.NULL)
 			throw new CompilationException("Unable to compile table '" + table + "'");
@@ -48,6 +50,7 @@ public class Translator {
 	 * matched table could not be compiled.
 	 */
 	public static Translator find(String query) throws CompilationException {
+		Louis.log(Logger.Level.DEBUG, "Finding table for query ", query);
 		String table = Louis.findTable(query);
 		if (table == null)
 			throw new CompilationException("No match found for query '" + query + "'");

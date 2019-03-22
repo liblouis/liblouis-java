@@ -90,7 +90,7 @@ public class Louis {
 				public File[] invoke(String table, File base) {
 					File[] ret = _invoke(table, base);
 					if (ret == null)
-						Louis.getLibrary()._lou_logMessage(Logger.Level.ERROR.value(), "Cannot resolve table '%s'", table);
+						log(Logger.Level.ERROR, "Cannot resolve table '%s'", table);
 					return ret;
 				}
 				private File[] _invoke(String table, File base) {
@@ -151,10 +151,12 @@ public class Louis {
 		tableResolverIsRegistered = false;
 	}
 	
+	private static Logger logCallback = null;
 	private static Lou_LogCallback lou_logCallback = null;
 	private static boolean loggerIsRegistered = false;
 	
 	public static synchronized void setLogger(final Logger logger) {
+		logCallback = logger;
 		lou_logCallback = new Lou_LogCallback() {
 			public void invoke(int level, String message) {
 				logger.log(Logger.Level.from(level), message);
@@ -165,6 +167,20 @@ public class Louis {
 	
 	public static void setLogLevel(Logger.Level level) {
 		getLibrary().lou_setLogLevel(level.value());
+	}
+	
+	static void log(Logger.Level level, String format, Object... args) {
+		Slf4jLogger.INSTANCE.log(level, format, args);
+		LouisLibrary lib = getLibrary();
+		if (logCallback != null && !(logCallback instanceof Slf4jLogger))
+			if (args.length > 0) {
+				String[] message = new String[1 + args.length];
+				message[0] = format;
+				for (int i = 0; i < args.length; i++)
+					message[1 + i] = args[i].toString();
+				lib._lou_logMessage(level.value(), message);
+			} else
+				lib._lou_logMessage(level.value(), format);
 	}
 	
 	/**
@@ -231,7 +247,7 @@ public class Louis {
 						catch (IOException e) { /* ignore */ }
 			}
 		}
-		if (lou_tableResolver == null) {
+		if (tableResolver == null) {
 			// default table resolver implementation that looks for tables inside this JAR and falls back to the file system
 			setTableResolver(new TableResolver() {
 					private final Map<String,URL> tables;
@@ -290,6 +306,9 @@ public class Louis {
 				}
 			);
 		}
+		if (logCallback == null)
+			// pass on log messages to SLF4J
+			setLogger(Slf4jLogger.INSTANCE);
 		if (!tableResolverIsRegistered) {
 			INSTANCE.lou_registerTableResolver(lou_tableResolver);
 			tableResolverIsRegistered = true;
@@ -474,4 +493,20 @@ public class Louis {
 	
 	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Louis.class);
 	
+	private static class Slf4jLogger implements Logger {
+		static Slf4jLogger INSTANCE = new Slf4jLogger();
+		public void log(Level level, String message) {
+			switch (level) {
+			case DEBUG: logger.debug(message); break;
+			case INFO:  logger.info(message);  break;
+			case WARN:  logger.warn(message);  break;
+			case FATAL:
+				message = "FATAL: " + message;
+			case ERROR: logger.error(message); break;
+			}
+		}
+		void log(Level level, String format, Object... args) {
+			log(level, String.format(format, args));
+		}
+	}
 }
