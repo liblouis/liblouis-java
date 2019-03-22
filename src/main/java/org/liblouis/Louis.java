@@ -65,6 +65,7 @@ public class Louis {
 	private static Lou_TableResolver lou_tableResolver = null;
 	private static TableResolver tableResolver = null;
 	private static boolean tableResolverIsRegistered = false;
+	private static boolean tablesAreIndexed = false;
 	// table names are generated for provided URLs without a name
 	private final static Map<String,URL> generatedTableNames = new HashMap<String,URL>();
 	// non-file URLs returned by resolver are read and stored to temporary files
@@ -128,6 +129,7 @@ public class Louis {
 								in = tableURL.openStream();
 								tableFile = File.createTempFile("liblouis-java-", ".tbl");
 								tableFile.delete();
+								logger.trace("Copying " + tableURL + " to " + tableFile);
 								Files.copy(in, tableFile.toPath());
 								tableFile.deleteOnExit();
 							} catch (IOException e) {
@@ -175,11 +177,28 @@ public class Louis {
 	/**
 	 * Get a list of all the top-level tables.
 	 */
-	public static Set<Table> listTables() {
+	public static synchronized Set<Table> listTables() {
 		Set<Table> tables = new HashSet<Table>();
-		for (String t : getLibrary().lou_listTables())
+		LouisLibrary lib = getLibrary();
+		lazyIndexTables(lib);
+		for (String t : lib.lou_listTables())
 			tables.add(new Table(t));
 		return Collections.unmodifiableSet(tables);
+	}
+	
+	static synchronized String findTable(String query) {
+		LouisLibrary lib = getLibrary();
+		lazyIndexTables(lib);
+		return lib.lou_findTable(query);
+	}
+	
+	private static void lazyIndexTables(LouisLibrary lib) {
+		if (!tablesAreIndexed) {
+			Set<String> allFiles = tableResolver.list();
+			logger.debug("Indexing tables");
+			lib.lou_indexTables(allFiles.toArray(new String[allFiles.size()]));
+			tablesAreIndexed = true;
+		}
 	}
 	
 	private static LouisLibrary INSTANCE;
@@ -221,7 +240,8 @@ public class Louis {
 						for (String table : listResources("org/liblouis/resource-files/tables"))
 							tables.put(table, Louis.class.getResource("resource-files/tables/" + table));
 						tablePaths = Collections.unmodifiableSet(tables.keySet());
-						logger.debug("Using default tables: " + tablePaths);
+						logger.debug("Using default tables");
+						logger.trace("Table files: " + tablePaths);
 					}
 					private final Map<String,URL> aggregatorTables = new HashMap<String,URL>();
 					public URL resolve(String table, URL base) {
@@ -273,9 +293,7 @@ public class Louis {
 		if (!tableResolverIsRegistered) {
 			INSTANCE.lou_registerTableResolver(lou_tableResolver);
 			tableResolverIsRegistered = true;
-			Set<String> allFiles = tableResolver.list();
-			// only needed for Translator.find() but we do it anyway
-			INSTANCE.lou_indexTables(allFiles.toArray(new String[allFiles.size()]));
+			tablesAreIndexed = false;
 		}
 		if (!loggerIsRegistered && lou_logCallback != null) {
 			INSTANCE.lou_registerLogCallback(lou_logCallback);

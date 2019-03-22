@@ -48,7 +48,7 @@ public class Translator {
 	 * matched table could not be compiled.
 	 */
 	public static Translator find(String query) throws CompilationException {
-		String table = Louis.getLibrary().lou_findTable(query);
+		String table = Louis.findTable(query);
 		if (table == null)
 			throw new CompilationException("No match found for query '" + query + "'");
 		return new Translator(table);
