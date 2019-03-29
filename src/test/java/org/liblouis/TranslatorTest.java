@@ -82,8 +82,8 @@ public class TranslatorTest {
 	public void testDotsIO() throws Exception {
 		Translator translator = newTranslator("foobar.cti");
 		assertEquals(
-			"⠋⠕⠕⠃⠁⠗",
-			translator.translate("foobar", null, null, null, StandardDisplayTables.UNICODE).getBraille());
+			"⢋⠕⠕⠃⠁⠗",
+			translator.translate("Foobar", null, null, null, StandardDisplayTables.UNICODE).getBraille());
 	}
 
 	@Test(expected=DisplayException.class)

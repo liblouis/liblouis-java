@@ -198,7 +198,7 @@ public interface DisplayTable {
 						if ((b1 & 0x80) == 0)
 							return CoderResult.malformedForLength(charsize);
 						byte b2 = in.get(k * charsize - 2);
-						Character c = (char)(b2 | '\u2800');
+						Character c = (char)((b2 & 0xff) | '\u2800');
 						if ((b1 & 0xff) != 0x80)
 							// virtual dots present
 							switch (virtualDotsFallback.method) {
