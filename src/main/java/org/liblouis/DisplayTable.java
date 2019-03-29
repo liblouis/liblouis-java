@@ -67,7 +67,7 @@ public interface DisplayTable {
 
 		/**
 		 * Act according to {@link CharsetDecoder#onUnmappableCharacter(CodingErrorAction)} and
-		 * {@link CharsetDecoder#onUnmappableCharacter(replaceWith)} settings.
+		 * {@link CharsetDecoder#replaceWith(String)} settings.
 		 */
 		public static final Fallback REPORT = new Fallback(FallbackMethod.REPORT);
 

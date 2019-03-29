@@ -76,7 +76,6 @@ public class Translator {
 	 *                                 point opportunity, `1` for soft hyphen and `2` for zero-width
 	 *                                 space). Length must be equal to the <code>text</code> length
 	 *                                 minus 1.
-	 * @param displayTable The display table used to encode the braille.
 	 * @return A TranslationResult containing the braille translation, the output character
 	 *         attributes (or <code>null</code> if <code>characterAttributes</code> was
 	 *         <code>null</code>), and the output inter-character attributes (or <code>null</code>
@@ -92,6 +91,9 @@ public class Translator {
 		return translate(text, typeform, characterAttributes, interCharacterAttributes, StandardDisplayTables.DEFAULT);
 	}
 	
+	/**
+	 * @param displayTable The display table used to encode the braille.
+	 */
 	public TranslationResult translate(String text,
 	                                   short[] typeform,
 	                                   int[] characterAttributes,
