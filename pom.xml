@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.liblouis</groupId>
   <artifactId>liblouis-java</artifactId>
-  <version>4.0.0</version>
+  <version>4.1.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
   <name>liblouis-java</name>
   <description>JNA based Java bindings to liblouis, an open-source braille translator and back-translator.</description>
@@ -39,7 +39,7 @@
       <dependency>
         <groupId>org.liblouis</groupId>
         <artifactId>louis</artifactId>
-        <version>3.6.0</version>
+        <version>3.9.0</version>
         <type>nar</type>
       </dependency>
     </dependencies>
@@ -106,14 +106,6 @@
                   <classifier>amd64-Linux-gpp-shared</classifier>
                   <type>nar</type>
                 </artifactItem>
-                <!--
-                <artifactItem>
-                  <groupId>org.liblouis</groupId>
-                  <artifactId>louis</artifactId>
-                  <classifier>i386-MacOSX-gpp-shared</classifier>
-                  <type>nar</type>
-                </artifactItem>
-                -->
                 <artifactItem>
                   <groupId>org.liblouis</groupId>
                   <artifactId>louis</artifactId>
