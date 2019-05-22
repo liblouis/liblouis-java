@@ -1,5 +1,3 @@
-#+locale: foo
-
 uplow Aa 18,1
 uplow Bb 128,12
 uplow Cc 148,14

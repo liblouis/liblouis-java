@@ -290,10 +290,12 @@ public class Louis {
 						}
 						// try file system
 						if (base != null && base.toString().startsWith("file:")) {
-							File f = new File(asFile(base), table);
+							File f = base.toString().endsWith("/")
+								? new File(asFile(base), table)
+								: new File(asFile(base).getParentFile(), table);
 							if (f.exists())
 								return asURL(f);
-						} else {
+						} else if (base == null) {
 							File f = new File(table);
 							if (f.exists())
 								return asURL(f);
@@ -414,7 +416,7 @@ public class Louis {
 		}
 	}
 	
-	private static File asFile(URL url) throws IllegalArgumentException {
+	static File asFile(URL url) throws IllegalArgumentException {
 		try {
 			if (!"file".equals(url.getProtocol()))
 				throw new RuntimeException("expected file URL");

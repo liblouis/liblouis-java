@@ -10,6 +10,7 @@ import java.util.Set;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
+import static org.liblouis.Louis.asFile;
 import static org.liblouis.Louis.asURL;
 
 public class FindTranslatorTest {
@@ -49,9 +50,17 @@ public class FindTranslatorTest {
 				public URL resolve(String table, URL base) {
 					if (table == null)
 						return null;
-					File tableFile = new File(table);
-					if (tableFile.exists())
-						return asURL(tableFile);
+					if (base != null && base.toString().startsWith("file:")) {
+						File f = base.toString().endsWith("/")
+							? new File(asFile(base), table)
+							: new File(asFile(base).getParentFile(), table);
+						if (f.exists())
+							return asURL(f);
+					} else if (base == null) {
+						File f = new File(table);
+						if (f.exists())
+							return asURL(f);
+					}
 					return null;
 				}
 				public Set<String> list() {
