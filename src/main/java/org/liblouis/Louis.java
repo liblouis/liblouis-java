@@ -22,6 +22,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.SimpleFileVisitor;
 import java.util.ArrayList;
@@ -420,7 +421,7 @@ public class Louis {
 		try {
 			if (!"file".equals(url.getProtocol()))
 				throw new RuntimeException("expected file URL");
-			return new File(new URI("file", url.getPath(), null));
+			return Paths.get(url.toURI()).toFile();
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e); // should not happen
 		}
