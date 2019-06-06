@@ -31,6 +31,6 @@ public class DefaultTablesTest {
 			t.getTranslator();
 			count++;
 		}
-		assertEquals(141, count);
+		assertEquals(143, count);
 	}
 }
