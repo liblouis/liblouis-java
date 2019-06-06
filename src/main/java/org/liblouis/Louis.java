@@ -1,36 +1,17 @@
 package org.liblouis;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.BasicFileAttributeView;
-import static java.nio.file.Files.walkFileTree;
 import java.nio.file.Files;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystemNotFoundException;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitOption;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Path;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.SimpleFileVisitor;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -209,7 +190,7 @@ public class Louis {
 	}
 	
 	private static void lazyIndexTables(LouisLibrary lib) {
-		if (!tablesAreIndexed) {
+		if (!tablesAreIndexed && tableResolver != null) {
 			Set<String> allFiles = tableResolver.list();
 			logger.debug("Indexing tables");
 			lib.lou_indexTables(allFiles.toArray(new String[allFiles.size()]));
@@ -218,6 +199,7 @@ public class Louis {
 	}
 	
 	private static LouisLibrary INSTANCE;
+	private static boolean standalone = true;
 	
 	static synchronized LouisLibrary getLibrary() {
 		if (INSTANCE == null) {
@@ -228,7 +210,9 @@ public class Louis {
 						Platform.isWindows() ? "liblouis" : "louis", // otherwise we have to rename the DLL files which
 						                                             // is not so easy to do in Maven
 						Louis.class.getClassLoader()); }
-				catch (IOException e) {}
+				catch (IOException e) {
+					// binaries are only included in standalone version
+				}
 			}
 			try {
 				String name = (libraryPath != null) ? libraryPath.getCanonicalPath() : "louis";
@@ -247,71 +231,19 @@ public class Louis {
 						catch (IOException e) { /* ignore */ }
 			}
 		}
-		if (tableResolver == null) {
-			// default table resolver implementation that looks for tables inside this JAR and falls back to the file system
-			setTableResolver(new TableResolver() {
-					private final Map<String,URL> tables;
-					private final Set<String> tablePaths; {
-						tables = new HashMap<String,URL>();
-						for (String table : listResources("org/liblouis/resource-files/tables"))
-							tables.put(table, Louis.class.getResource("resource-files/tables/" + table));
-						tablePaths = Collections.unmodifiableSet(tables.keySet());
-						logger.debug("Using default tables");
-						logger.trace("Table files: " + tablePaths);
-					}
-					private final Map<String,URL> aggregatorTables = new HashMap<String,URL>();
-					public URL resolve(String table, URL base) {
-						// if we are resolving an include rule from a generated aggregator table, resolve without base
-						if (aggregatorTables.containsValue(base))
-							base = null;
-						if (base == null || tables.containsValue(base)) {
-							if (tables.containsKey(table))
-								return tables.get(table);
-						}
-						// if it is a comma separated table list, create a single file that includes all the sub-tables
-						if (base == null && table.contains(",")) {
-							if (aggregatorTables.containsKey(table))
-								return aggregatorTables.get(table);
-							StringBuilder b = new StringBuilder();
-							for (String s : table.split(","))
-								b.append("include ").append(s.replaceAll("\\\\", "\\\\\\\\")).append('\n');
-							InputStream in = new ByteArrayInputStream(b.toString().getBytes(StandardCharsets.UTF_8));
-							try {
-								File f = File.createTempFile("liblouis-java-", ".tbl");
-								f.delete();
-								Files.copy(in, f.toPath());
-								f.deleteOnExit();
-								URL u = asURL(f);
-								aggregatorTables.put(table, u);
-								return u;
-							} catch (IOException e) {
-								throw new RuntimeException(e); // should not happen
-							}
-						}
-						// try file system
-						if (base != null && base.toString().startsWith("file:")) {
-							File f = base.toString().endsWith("/")
-								? new File(asFile(base), table)
-								: new File(asFile(base).getParentFile(), table);
-							if (f.exists())
-								return asURL(f);
-						} else if (base == null) {
-							File f = new File(table);
-							if (f.exists())
-								return asURL(f);
-						}
-						return null; // table cannot be resolved
-					}
-					public Set<String> list() {
-						return tablePaths;
-					}
-				}
-			);
+		if (tableResolver == null && standalone) {
+			try {
+				setTableResolver(new EmbeddedTableResolver(logger)); }
+			catch (Throwable e) {
+				// tables are only included in standalone version
+				// if tables are not present it will result in an exception in EmbeddedTableResolver.listResources
+				standalone = false;
+			}
 		}
 		if (logCallback == null)
 			// pass on log messages to SLF4J
 			setLogger(Slf4jLogger.INSTANCE);
-		if (!tableResolverIsRegistered) {
+		if (lou_tableResolver != null && !tableResolverIsRegistered) {
 			INSTANCE.lou_registerTableResolver(lou_tableResolver);
 			tableResolverIsRegistered = true;
 			tablesAreIndexed = false;
@@ -435,61 +367,6 @@ public class Louis {
 			throw new RuntimeException(e); // should not happen
 		} catch (IOException e) {
 			throw new RuntimeException(e); // should not happen
-		}
-	}
-	
-	private static Iterable<String> listResources(final String directory) {
-		File jarFile = asFile(Louis.class.getProtectionDomain().getCodeSource().getLocation());
-		if (!jarFile.exists())
-			throw new RuntimeException();
-		else if (jarFile.isDirectory()) {
-			File d = new File(jarFile, directory);
-			if (!d.exists())
-				throw new RuntimeException("directory does not exist");
-			else if (!d.isDirectory())
-				throw new RuntimeException("is not a directory");
-			else {
-				List<String> resources = new ArrayList<String>();
-				for (File f : d.listFiles())
-					resources.add(f.getName() + (f.isDirectory() ? "/" : ""));
-				return resources; }}
-		else {
-			FileSystem fs; {
-				try {
-					fs = FileSystems.newFileSystem(URI.create("jar:" + jarFile.toURI()),
-					                               Collections.<String,Object>emptyMap()); }
-				catch (IOException e) {
-					throw new RuntimeException(e); }}
-			try {
-				Path d = fs.getPath("/" + directory);
-				BasicFileAttributes a; {
-					try {
-						a = Files.getFileAttributeView(d, BasicFileAttributeView.class).readAttributes(); }
-					catch (NoSuchFileException e) {
-						throw new RuntimeException("directory does not exist"); }
-					catch (FileSystemNotFoundException e) {
-						throw new RuntimeException(e); }
-					catch (IOException e) {
-						throw new RuntimeException(e); }}
-				if (!a.isDirectory())
-					throw new RuntimeException("is not a directory");
-				final List<String> resources = new ArrayList<String>();
-				try {
-					walkFileTree(d, EnumSet.noneOf(FileVisitOption.class), 1, new SimpleFileVisitor<Path>() {
-							public FileVisitResult visitFile(Path f, BasicFileAttributes _) throws IOException {
-								resources.add(""+f.getFileName());
-								return FileVisitResult.CONTINUE; }}); }
-				catch (NoSuchFileException e) {
-					throw new RuntimeException(e); }
-				catch (IOException e) {
-					throw new RuntimeException(e); }
-				return resources; }
-			finally {
-				try {
-					fs.close(); }
-				catch (IOException e) {
-					throw new RuntimeException(e); }
-			}
 		}
 	}
 	

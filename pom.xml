@@ -134,23 +134,18 @@
         <artifactId>build-helper-maven-plugin</artifactId>
         <version>3.0.0</version>
         <executions>
+          <!--
+              Add the binaries to the test classpath in order to make the tests work. Adding them to
+              the (standalone) JAR is done in the maven-bundle-plugin.
+          -->
           <execution>
-            <id>add-resources</id>
-            <phase>generate-resources</phase>
+            <id>add-test-resources</id>
+            <phase>generate-test-resources</phase>
             <goals>
-              <goal>add-resource</goal>
+              <goal>add-test-resource</goal>
             </goals>
             <configuration>
               <resources>
-                <resource>
-                  <directory>target/dependency/share/liblouis/tables</directory>
-                  <targetPath>org/liblouis/resource-files/tables</targetPath>
-                </resource>
-                <!--
-                    For MacOS include only 64-bit version because JNA only looks in one path, namely
-                    /darwin/liblouis.dylib. The alternative is to build a multi-architecture binary,
-                    or to check the architecture in Louis.java and specify an exact path in the JAR.
-                -->
                 <resource>
                   <directory>target/dependency/lib/x86_64-MacOSX-gpp/shared</directory>
                   <includes>
@@ -194,6 +189,10 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <excludes>
+            <!-- part of integration-test -->
+            <exclude>org/liblouis/DefaultTablesTest.java</exclude>
+          </excludes>
           <forkMode>pertest</forkMode>
           <systemPropertyVariables>
             <jna.nosys>true</jna.nosys>
@@ -212,6 +211,28 @@
             <addMavenDescriptor>false</addMavenDescriptor>
           </archive>
         </configuration>
+        <executions>
+          <execution>
+            <id>bundle-standalone</id>
+            <phase>package</phase>
+            <goals>
+              <goal>bundle</goal>
+            </goals>
+            <configuration>
+              <classifier>standalone</classifier>
+              <instructions>
+                <Include-Resource>
+                  org/liblouis/resource-files/tables=target/dependency/share/liblouis/tables,
+                  darwin/liblouis.dylib=target/dependency/lib/x86_64-MacOSX-gpp/shared/liblouis.dylib,
+                  linux-x86/liblouis.so=target/dependency/lib/i386-Linux-gpp/shared/liblouis.so,
+                  linux-x86-64/liblouis.so=target/dependency/lib/amd64-Linux-gpp/shared/liblouis.so,
+                  win32-x86/liblouis.dll=target/dependency/bin/i686-w64-mingw32-gpp/liblouis.dll,
+                  win32-x86-64/liblouis.dll=target/dependency/bin/x86_64-w64-mingw32-gpp/liblouis.dll
+                </Include-Resource>
+              </instructions>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <!--
           run the same tests but from another project
