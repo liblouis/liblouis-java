@@ -5,6 +5,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import static org.liblouis.Louis.asFile;
+
 public class ThreadsTest {
 	
 	// If liblouis-java is thread-safe, the test should finish without causing crashes.
@@ -51,7 +53,7 @@ public class ThreadsTest {
 	private final File tablesDir;
 
 	public ThreadsTest() {
-		File testRootDir = new File(this.getClass().getResource("/").getPath());
+		File testRootDir = asFile(this.getClass().getResource("/"));
 		tablesDir = new File(testRootDir, "tables");
 	}
 }

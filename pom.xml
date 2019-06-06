@@ -243,7 +243,10 @@
         <configuration>
           <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
           <settingsFile>src/it/settings.xml</settingsFile>
-          <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+          <!--
+              Note that this path contains a space, as does the path to the "test- standalone-jar" test.
+          -->
+          <localRepositoryPath>${project.build.directory}/local- repo</localRepositoryPath>
           <properties>
             <liblouis-java.version>${project.version}</liblouis-java.version>
             <liblouis-java.basedir>${project.basedir}</liblouis-java.basedir>

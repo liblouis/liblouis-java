@@ -8,6 +8,7 @@ import java.util.Set;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
+import static org.liblouis.Louis.asFile;
 import static org.liblouis.Louis.asURL;
 
 public class TableResolverTest {
@@ -29,7 +30,7 @@ public class TableResolverTest {
 	}
 	
 	public TableResolverTest() {
-		final File testRootDir = new File(this.getClass().getResource("/").getPath());
+		final File testRootDir = asFile(this.getClass().getResource("/"));
 		Louis.setTableResolver(new TableResolver() {
 				public URL resolve(String table, URL base) {
 					if (table == null)

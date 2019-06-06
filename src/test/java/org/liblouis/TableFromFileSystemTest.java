@@ -5,6 +5,8 @@ import java.io.File;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
+import static org.liblouis.Louis.asFile;
+
 public class TableFromFileSystemTest {
 	
 	@Test
@@ -18,7 +20,7 @@ public class TableFromFileSystemTest {
 	private final File tablesDir;
 
 	public TableFromFileSystemTest() {
-		File testRootDir = new File(this.getClass().getResource("/").getPath());
+		File testRootDir = asFile(this.getClass().getResource("/"));
 		tablesDir = new File(testRootDir, "tables");
 	}
 }

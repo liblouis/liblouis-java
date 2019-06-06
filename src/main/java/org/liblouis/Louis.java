@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
@@ -352,7 +351,7 @@ public class Louis {
 		try {
 			if (!"file".equals(url.getProtocol()))
 				throw new RuntimeException("expected file URL");
-			return new File(new URI("file", url.getPath(), null));
+			return new File(url.toURI());
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e); // should not happen
 		}
@@ -362,7 +361,7 @@ public class Louis {
 	static URL asURL(File file) {
 		try {
 			file = file.getCanonicalFile();
-			return new URL(URLDecoder.decode(file.toURI().toString().replace("+", "%2B")));
+			return file.toURI().toURL();
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e); // should not happen
 		} catch (IOException e) {

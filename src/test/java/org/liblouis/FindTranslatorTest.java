@@ -42,7 +42,7 @@ public class FindTranslatorTest {
 	}
 	
 	public FindTranslatorTest() {
-		File testRootDir = new File(this.getClass().getResource("/").getPath());
+		File testRootDir = asFile(this.getClass().getResource("/"));
 		final Set<String> tables = new HashSet<String>();
 		for (File f : new File(testRootDir, "tables").listFiles())
 			tables.add(f.getAbsolutePath());

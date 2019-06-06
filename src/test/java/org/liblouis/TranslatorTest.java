@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import org.liblouis.DisplayTable.StandardDisplayTables;
+import static org.liblouis.Louis.asFile;
 import static org.liblouis.Utilities.Hyphenation.insertHyphens;
 
 public class TranslatorTest {
@@ -132,7 +133,7 @@ public class TranslatorTest {
 	private final File tablesDir;
 
 	public TranslatorTest() {
-		File testRootDir = new File(this.getClass().getResource("/").getPath());
+		File testRootDir = asFile(this.getClass().getResource("/"));
 		tablesDir = new File(testRootDir, "tables");
 	}
 }
