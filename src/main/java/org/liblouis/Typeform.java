@@ -2,6 +2,7 @@ package org.liblouis;
 
 public final class Typeform {
 
+	public static final Typeform PLAIN_TEXT = new Typeform(null, (short)0);
 	public static final Typeform COMPUTER = new Typeform("computer", (short)0x0400);
 	
 	private final String name;

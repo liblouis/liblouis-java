@@ -74,9 +74,9 @@ public class TranslatorTest {
 	@Test
 	public void testTypeform() throws Exception {
 		Translator translator = newTranslator("foobar.cti");
-		Typeform t = null;
+		Typeform t = Typeform.PLAIN_TEXT;
 		for (Typeform tt : translator.getSupportedTypeforms())
-			t = t == null ? tt : t.add(tt);
+			t = t.add(tt);
 		assertEquals(
 			"_/foobar/_",
 			translator.translate("foobar", new Typeform[]{t,t,t,t,t,t}, null, null).getBraille());
