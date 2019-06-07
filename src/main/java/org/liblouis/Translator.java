@@ -3,10 +3,13 @@ package org.liblouis;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Set;
 
 import org.liblouis.DisplayTable.StandardDisplayTables;
 import org.liblouis.Louis.LouisLibrary;
@@ -61,6 +64,21 @@ public class Translator {
 		return table;
 	}
 	
+	private Set<Typeform> typeforms = null;
+	
+	public Set<Typeform> getSupportedTypeforms() {
+		if (typeforms == null) {
+			typeforms = new HashSet<Typeform>();
+			short value = 1;
+			for (String emphClass : Louis.getLibrary().lou_getEmphClasses(table)) {
+				typeforms.add(new Typeform(emphClass, value, this));
+				value *= 2;
+			}
+			typeforms = Collections.unmodifiableSet(typeforms);
+		}
+		return typeforms;
+	}
+	
 	/**
 	 * @param text The text to translate.
 	 * @param typeform Array with typeform information about the text. Must have the same length as
@@ -84,9 +102,17 @@ public class Translator {
 	 * @throws DisplayException if the braille could not be encoded (due to virtual dots).
 	 */
 	public TranslationResult translate(String text,
-	                                   short[] typeform,
+	                                   Typeform[] typeform,
 	                                   int[] characterAttributes,
 	                                   int[] interCharacterAttributes)
+			throws TranslationException, DisplayException {
+		return translate(text, typeform, characterAttributes, interCharacterAttributes, StandardDisplayTables.DEFAULT);
+	}
+	
+	private TranslationResult translate(String text,
+	                                    short[] typeform,
+	                                    int[] characterAttributes,
+	                                    int[] interCharacterAttributes)
 			throws TranslationException, DisplayException {
 		return translate(text, typeform, characterAttributes, interCharacterAttributes, StandardDisplayTables.DEFAULT);
 	}
@@ -95,10 +121,30 @@ public class Translator {
 	 * @param displayTable The display table used to encode the braille.
 	 */
 	public TranslationResult translate(String text,
-	                                   short[] typeform,
+	                                   Typeform[] typeform,
 	                                   int[] characterAttributes,
 	                                   int[] interCharacterAttributes,
 	                                   DisplayTable displayTable)
+			throws TranslationException, DisplayException {
+		short[] tf = null;
+		if (typeform != null) {
+			tf = new short[typeform.length];
+			for (int i = 0; i < typeform.length; i++) {
+				if (typeform == null)
+					tf[i] = 0;
+				else if (typeform[i].table != null && !typeform[i].table.equals(this))
+					throw new TranslationException("Can not use a typeform defined in another table.");
+				else tf[i] = typeform[i].value;
+			}
+		}
+		return translate(text, tf, characterAttributes, interCharacterAttributes, displayTable);
+	}
+	
+	private TranslationResult translate(String text,
+	                                    short[] typeform,
+	                                    int[] characterAttributes,
+	                                    int[] interCharacterAttributes,
+	                                    DisplayTable displayTable)
 			throws TranslationException, DisplayException {
 		if (typeform != null)
 			if (typeform.length != text.length())

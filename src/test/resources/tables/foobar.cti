@@ -37,9 +37,14 @@ digit 8 125
 digit 9 24
 
 sign / 34
+sign _ 36
 
 emphclass italic
 begemph italic 34
 endemph italic 34
+
+emphclass underline
+begemph underline 36
+endemph underline 36
 
 space \t 9

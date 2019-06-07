@@ -1,5 +1,8 @@
 package org.liblouis;
 
+/**
+ * Proxy for a Translator, with metadata.
+ */
 public class Table {
 	
 	private final String table;

@@ -298,6 +298,8 @@ public class Louis {
 		
 		public void _lou_logMessage(int level, String... format);
 		
+		public String[] lou_getEmphClasses(String tableList);
+		
 	}
 	
 	interface Lou_TableResolver extends Callback {
