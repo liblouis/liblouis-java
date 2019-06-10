@@ -130,7 +130,7 @@ public class Translator {
 		if (typeform != null) {
 			tf = new short[typeform.length];
 			for (int i = 0; i < typeform.length; i++) {
-				if (typeform == null)
+				if (typeform[i] == null)
 					tf[i] = 0;
 				else if (typeform[i].table != null && !typeform[i].table.equals(this))
 					throw new TranslationException("Can not use a typeform defined in another table.");
