@@ -7,11 +7,11 @@ public class CompilationException extends Exception {
 		super(message);
 	}
 	
-	public CompilationException(Throwable throwable) {
-		super(throwable);
+	public CompilationException(Throwable cause) {
+		super(cause);
 	}
 	
-	public CompilationException(String message, Throwable throwable) {
-		super(message, throwable);
+	public CompilationException(String message, Throwable cause) {
+		super(message, cause);
 	}
 }

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Set;
@@ -49,15 +50,15 @@ public class Translator {
 	
 	/**
 	 * @param query A table query
-	 * @throws CompilationException if no match could be found or if the
-	 * matched table could not be compiled.
+	 * @throws IllegalArgumentException if the query does not use the right syntax.
+	 * @throws CompilationException if no match could be found or if the matched table could not be compiled.
 	 */
-	public static Translator find(String query) throws CompilationException {
-		Louis.log(Logger.Level.DEBUG, "Finding table for query ", query);
-		String table = Louis.findTable(query);
-		if (table == null)
-			throw new CompilationException("No match found for query '" + query + "'");
-		return new Translator(table);
+	public static Translator find(String query) throws IllegalArgumentException, CompilationException {
+		try {
+			return Table.find(query).getTranslator();
+		} catch (NoSuchElementException e) {
+			throw new CompilationException(e);
+		}
 	}
 	
 	public String getTable() {

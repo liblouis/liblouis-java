@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.junit.Test;
@@ -13,16 +14,16 @@ import static org.junit.Assert.assertEquals;
 import static org.liblouis.Louis.asFile;
 import static org.liblouis.Louis.asURL;
 
-public class FindTranslatorTest {
+public class FindTableTest {
 	
-	@Test(expected=CompilationException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void testInvalidQuery() throws Exception {
-		Translator.find("locale: foo");
+		Table.find("locale: foo");
 	}
 	
-	@Test(expected=CompilationException.class)
+	@Test(expected=NoSuchElementException.class)
 	public void testNoMatchFound() throws Exception {
-		Translator.find("locale:fu");
+		Table.find("locale:fu");
 	}
 	
 	@Test
@@ -41,7 +42,7 @@ public class FindTranslatorTest {
 		assertEquals("foo", locales.get(0));
 	}
 	
-	public FindTranslatorTest() {
+	public FindTableTest() {
 		File testRootDir = asFile(this.getClass().getResource("/"));
 		final Set<String> tables = new HashSet<String>();
 		for (File f : new File(testRootDir, "tables").listFiles())
