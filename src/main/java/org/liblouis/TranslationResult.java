@@ -29,7 +29,7 @@ public class TranslationResult {
 		// This is more or less copied from lou_translatePrehyphenated. The difference is that here
 		// we work with int arrays instead of byte arrays, and also the nil value is 0 here instead
 		// of 48 (character '0').
-		if (interCharacterAttributes != null) {
+		if (interCharacterAttributes != null && len > 0) {
 			this.interCharacterAttributes = new int[len - 1];
 			int inpos = 0;
 			for (int outpos = 1; outpos < len; outpos++) {
