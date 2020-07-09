@@ -269,7 +269,7 @@
   </build>
   <profiles>
     <profile>
-      <id>sonatype-deploy</id>
+      <id>sonatype-oss-release</id>
       <build>
         <plugins>
           <plugin>
