@@ -40,7 +40,20 @@ public class TranslatorTest {
 			"foobar",
 			translator.translate("foobar", null, null, null).getBraille());
 	}
-	
+
+	@Test
+	public void testTranslateCharAttr() throws Exception {
+		String inputStr = "\uD835\uDEFC";
+		int[] cpInput = inputStr.codePoints().toArray();
+		int[] interCharAttr = new int[cpInput.length - 1];
+		int[] charAtts = new int[cpInput.length];
+
+		Translator translator = newTranslator("foobar.cti");
+		assertEquals(
+			inputStr,
+			translator.translate(inputStr, null, charAtts, interCharAttr).getBraille());
+	}
+
 	@Test
 	public void testBackTranslate() throws Exception {
 		Translator translator = newTranslator("foobar.cti");
