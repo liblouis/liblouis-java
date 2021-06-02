@@ -40,7 +40,23 @@ public class TranslatorTest {
 			"foobar",
 			translator.translate("foobar", null, null, null).getBraille());
 	}
-	
+
+	@Test(expected=IllegalArgumentException.class)
+	public void testSurrogatePair() throws Exception {
+		String text = "\uD835\uDEFC";
+		int textLength = text.codePoints().toArray().length;
+		int[] interCharAttr = new int[textLength - 1];
+		for (int k = 0; k < interCharAttr.length; k++)
+			interCharAttr[k] = k;
+		int[] charAtts = new int[textLength];
+		for (int k = 0; k < charAtts.length; k++)
+			charAtts[k] = k;
+		Translator translator = newTranslator("foobar.cti");
+		assertEquals(
+			"⠄⡳⠽⠁⠙⠋⠋⠉⠄", // 1D6FC
+			translator.translate(text, null, charAtts, interCharAttr, StandardDisplayTables.UNICODE).getBraille());
+	}
+
 	@Test
 	public void testBackTranslate() throws Exception {
 		Translator translator = newTranslator("foobar.cti");
