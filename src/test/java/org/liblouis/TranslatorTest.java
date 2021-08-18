@@ -15,7 +15,7 @@ public class TranslatorTest {
 	@Test
 	public void testVersion() {
 		assertEquals(
-			"3.16.0",
+			"3.17.0",
 			Louis.getVersion());
 	}
 	
@@ -41,7 +41,6 @@ public class TranslatorTest {
 			translator.translate("foobar", null, null, null).getBraille());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
 	public void testSurrogatePair() throws Exception {
 		String text = "\uD835\uDEFC";
 		int textLength = text.codePoints().toArray().length;
