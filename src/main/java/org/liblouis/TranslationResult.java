@@ -18,7 +18,7 @@ public class TranslationResult {
 		try {
 			this.braille = outbuf.read(len, displayTable); }
 		catch (UnmappableCharacterException e) {
-			throw new DisplayException("virtual dots present in output", e); }
+			throw new DisplayException("unmappable dot pattern present in output", e); }
 		catch (IOException e) {
 			throw new RuntimeException("should not happen", e); }
 		if (characterAttributes != null) {

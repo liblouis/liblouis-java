@@ -83,7 +83,11 @@ public class TranslatorTest {
 	@Test
 	public void testDisplay() throws Exception {
 		Translator translator = newTranslator("foobar.cti");
-		assertEquals("foobar", translator.display("⠋⠕⠕⠃⠁⠗"));
+		DisplayTable displayTable = translator.asDisplayTable();
+		assertEquals("foobar", displayTable.encode("⠋⠕⠕⠃⠁⠗"));
+		assertEquals(
+			"foobar",
+			translator.translate("foobar", null, null, null, displayTable).getBraille());
 	}
 	
 	@Test
@@ -122,6 +126,14 @@ public class TranslatorTest {
 				"foo\tbar", null, null, null,
 				new DisplayTable.UnicodeBrailleDisplayTable(DisplayTable.Fallback.MASK)
 			).getBraille());
+	}
+	
+	@Test
+	public void testDotsIOWithVirtualDots() throws Exception {
+		Translator translator = newTranslator("foobar.cti");
+		assertEquals(
+			"foo\tbar",
+			translator.translate("foo\tbar", null, null, null, translator.asDisplayTable()).getBraille());
 	}
 	
 	private Translator newTranslator(String tables) throws IOException, CompilationException {

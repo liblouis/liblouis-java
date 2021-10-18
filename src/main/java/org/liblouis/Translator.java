@@ -23,9 +23,8 @@ public class Translator {
 	public static final byte SHY = 1;
 	public static final byte ZWSP = 2;
 	
-	private static final int MODE_DOTSIO = 4;
-	
 	private final String table;
+	private DisplayTable displayTable = null;
 	
 	/**
 	 * @param table The translation table or table list to compile.
@@ -192,7 +191,7 @@ public class Translator {
 			typeform = Arrays.copyOf(typeform, outbuf.length());
 		if (characterAttributes != null || interCharacterAttributes != null)
 			inputPos = getIntegerBuffer("inputpos", textLength * OUTLEN_MULTIPLIER);
-		int mode = displayTable != StandardDisplayTables.DEFAULT ? MODE_DOTSIO : 0;
+		int mode = displayTable.getMode().value();
 		if (Louis.getLibrary().lou_translate(table, inbuf, inlen, outbuf, outlen, typeform,
 		                                     null, null, inputPos, null, mode) == 0)
 			throw new TranslationException("Unable to complete translation");
@@ -264,25 +263,14 @@ public class Translator {
 			hyphenPositions[matcher.start() + 1] = ZWSP;
 		return hyphenPositions;
 	}
-	
+
 	/**
-	 * Convert a braille string from either Unicode braille or Liblouis' dotsIO format to the
-	 * charset defined by the (display) table.
+	 * Use this translation table as a display table.
 	 */
-	public String display(String braille) throws TranslationException {
-		WideString inbuf;
-		try {
-			inbuf = getWideCharBuffer("text-in", braille.length()).write(braille); }
-		catch (IOException e) {
-			throw new RuntimeException("should not happen", e); }
-		int length = braille.length();
-		WideString outbuf = getWideCharBuffer("text-out", braille.length() * OUTLEN_MULTIPLIER);
-		if (Louis.getLibrary().lou_dotsToChar(table, inbuf, outbuf, length, 0) == 0)
-			throw new TranslationException("Unable to complete translation");
-		try {
-			return outbuf.read(length); }
-		catch (IOException e) {
-			throw new RuntimeException("should not happen", e); }
+	public DisplayTable asDisplayTable() {
+		if (displayTable == null)
+			displayTable = DisplayTable.fromTable(table);
+		return displayTable;
 	}
 	
 	/*
@@ -305,7 +293,7 @@ public class Translator {
 			}
 		};
 	
-	private static WideString getWideCharBuffer(String id, int minCapacity) {
+	static WideString getWideCharBuffer(String id, int minCapacity) {
 		WideString buffer = buffers.get().WIDECHAR_BUFFERS.get(id);
 		if (buffer == null || buffer.length() < minCapacity) {
 			buffer = new WideString(minCapacity * 2);

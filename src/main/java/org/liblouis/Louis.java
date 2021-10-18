@@ -268,6 +268,8 @@ public class Louis {
 		
 		public int lou_dotsToChar(String tableList, WideString inbuf, WideString outbuf, int length, int mode);
 		
+		public int lou_charToDots(String tableList, WideString inbuf, WideString outbuf, int length, int mode);
+		
 		public int lou_charSize();
 		
 		public String lou_version();
