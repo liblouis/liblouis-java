@@ -234,8 +234,8 @@ public class Louis {
 			try {
 				setTableResolver(new EmbeddedTableResolver(logger)); }
 			catch (Throwable e) {
-				// tables are only included in standalone version
-				// if tables are not present it will result in an exception in EmbeddedTableResolver.listResources
+				// tables are included in "resources" artifact
+				// if it is not on the class path it will result in an exception in EmbeddedTableResolver.listResources
 				standalone = false;
 			}
 		}

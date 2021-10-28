@@ -219,14 +219,17 @@
         </configuration>
         <executions>
           <execution>
-            <id>bundle-standalone</id>
+            <id>bundle-resources</id>
             <phase>package</phase>
             <goals>
               <goal>bundle</goal>
             </goals>
             <configuration>
-              <classifier>standalone</classifier>
-              <instructions>
+              <classifier>resources</classifier>
+              <instructions combine.self="replace">
+                <Bundle-SymbolicName>org.liblouis.java.resources</Bundle-SymbolicName>
+                <Private-Package/>
+                <Export-Package/>
                 <Include-Resource>
                   org/liblouis/resource-files/tables=target/dependency/share/liblouis/tables,
                   darwin/liblouis.dylib=target/dependency/lib/x86_64-MacOSX-gpp/shared/liblouis.dylib,
