@@ -20,6 +20,7 @@ import com.sun.jna.NativeMapped;
 import com.sun.jna.Pointer;
 import com.sun.jna.PointerType;
 
+import org.liblouis.DisplayTable.IOMode;
 import org.liblouis.DisplayTable.StandardDisplayTables;
 
 public final class WideCharString extends PointerType implements NativeMapped {
@@ -73,6 +74,12 @@ public final class WideCharString extends PointerType implements NativeMapped {
 		return read(length, StandardDisplayTables.UNICODE);
 	}
 	
+	/**
+	 * @param length The number of characters to read
+	 * @return The Java string
+	 * @throws UnmappableCharacterException if there are unmappable dots patterns in the output and no fallback was specified.
+	 * @throws IOException if length exceeds the maximum number of characters in this string
+	 */
 	String read(int length, DisplayTable displayTable) throws UnmappableCharacterException, IOException {
 		Charset charset = displayTable.asCharset();
 		if (decoders == null)
@@ -84,11 +91,11 @@ public final class WideCharString extends PointerType implements NativeMapped {
 			                 .onUnmappableCharacter(CodingErrorAction.REPORT);
 			decoders.put(charset, decoder);
 		}
-		return read(length, decoder);
+		return read(length, decoder, displayTable.getMode() == IOMode.DOTS_IO);
 	}
 	
 	// using CharsetDecoder because behavior of String(byte[]) is undefined when bytes can not be decoded
-	private String read(int length, CharsetDecoder decoder) throws UnmappableCharacterException, IOException {
+	private String read(int length, CharsetDecoder decoder, boolean dotsIO) throws UnmappableCharacterException, IOException {
 		synchronized (decoder) {
 			if (length > length())
 				throw new IOException("Maximum length is " + length());
@@ -110,6 +117,14 @@ public final class WideCharString extends PointerType implements NativeMapped {
 					chars = b;
 					continue;
 				}
+				if (cr.isUnmappable() && dotsIO) {
+					byte b2 = bytes.get();
+					byte b1 = bytes.get();
+					String unmappableDotPattern = printDotPattern((char)((b2 & 0xff) | (b1 << 8)));
+					throw new UnmappableCharacterException(cr.length()) {
+						public String getMessage() {
+							return "Unmappable dot pattern: '" + unmappableDotPattern + "'"; }};
+				}
 				try {
 					cr.throwException();
 				} catch (MalformedInputException e) {
@@ -120,7 +135,30 @@ public final class WideCharString extends PointerType implements NativeMapped {
 			return chars.toString();
 		}
 	}
-	
+
+	private static String printDotPattern(Character c) {
+		StringBuilder b = new StringBuilder();
+		if ((c & 0x0001) != 0) b.append("1");
+		if ((c & 0x0002) != 0) b.append("2");
+		if ((c & 0x0004) != 0) b.append("3");
+		if ((c & 0x0008) != 0) b.append("4");
+		if ((c & 0x0010) != 0) b.append("5");
+		if ((c & 0x0020) != 0) b.append("6");
+		if ((c & 0x0040) != 0) b.append("7");
+		if ((c & 0x0080) != 0) b.append("8");
+		if ((c & 0x0100) != 0) b.append("9");
+		if ((c & 0x0200) != 0) b.append("A");
+		if ((c & 0x0400) != 0) b.append("B");
+		if ((c & 0x0800) != 0) b.append("C");
+		if ((c & 0x1000) != 0) b.append("D");
+		if ((c & 0x2000) != 0) b.append("E");
+		if ((c & 0x4000) != 0) b.append("F");
+		if (b.length() == 0)
+			return "0";
+		else
+			return b.toString();
+	}
+
 	/**
 	 * Write as UTF-32 or UTF-16 string
 	 *

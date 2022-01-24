@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import org.liblouis.DisplayTable.StandardDisplayTables;
@@ -109,12 +110,18 @@ public class TranslatorTest {
 			translator.translate("Foobar", null, null, null, StandardDisplayTables.UNICODE).getBraille());
 	}
 
-	@Test(expected=DisplayException.class)
+	@Test
 	public void testDecodingError() throws Exception {
-		Translator translator = newTranslator("foobar.cti");
-		assertEquals(
-			"⠋⠕⠕⠀⠃⠁⠗",
-			translator.translate("foo\tbar", null, null, null, StandardDisplayTables.UNICODE).getBraille());
+		try {
+			Translator translator = newTranslator("foobar.cti");
+			assertEquals(
+				"⠋⠕⠕⠀⠃⠁⠗",
+				translator.translate("foo\tbar", null, null, null, StandardDisplayTables.UNICODE).getBraille());
+		} catch (DisplayException e) {
+			assertEquals("Unmappable dot pattern: '9'", e.getMessage());
+			return;
+		}
+		fail("Expected DisplayException");
 	}
 	
 	@Test
