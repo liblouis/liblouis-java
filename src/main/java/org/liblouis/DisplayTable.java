@@ -377,12 +377,12 @@ public interface DisplayTable {
 		@Override
 		public String encode(String s) {
 			int length = s.length();
-			WideString inbuf;
+			WideCharString inbuf;
 			try {
 				inbuf = Translator.getWideCharBuffer("text-in", length).write(s); }
 			catch (IOException e) {
 				throw new RuntimeException("should not happen", e); }
-			WideString outbuf = Translator.getWideCharBuffer("text-out", length);
+			WideCharString outbuf = Translator.getWideCharBuffer("text-out", length);
 			int mode = 0; // mode argument not used
 			if (Louis.getLibrary().lou_dotsToChar(table, inbuf, outbuf, length, mode) == 0)
 				throw new RuntimeException("lou_dotsToChar failed"); // should not happen if table was compiled successfully
@@ -395,12 +395,12 @@ public interface DisplayTable {
 		@Override
 		public String decode(String s) {
 			int length = s.length();
-			WideString inbuf;
+			WideCharString inbuf;
 			try {
 				inbuf = Translator.getWideCharBuffer("text-in", length).write(s); }
 			catch (IOException e) {
 				throw new RuntimeException("should not happen", e); }
-			WideString outbuf = Translator.getWideCharBuffer("text-out", length);
+			WideCharString outbuf = Translator.getWideCharBuffer("text-out", length);
 			int ucBrl = 64;
 			if (Louis.getLibrary().lou_charToDots(table, inbuf, outbuf, length, ucBrl) == 0)
 				throw new RuntimeException("lou_charToDots failed"); // should not happen if table was compiled successfully

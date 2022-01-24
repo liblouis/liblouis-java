@@ -22,22 +22,22 @@ import com.sun.jna.PointerType;
 
 import org.liblouis.DisplayTable.StandardDisplayTables;
 
-public final class WideString extends PointerType implements NativeMapped {
+public final class WideCharString extends PointerType implements NativeMapped {
 	
 	private static Map<Charset,CharsetEncoder> encoders;
 	private static Map<Charset,CharsetDecoder> decoders;
 	
 	private final int length;
 	
-	public WideString() {
+	public WideCharString() {
 		this(0);
 	}
 	
-	WideString(int length) {
+	WideCharString(int length) {
 		this.length = length;
 	}
 	
-	WideString(String value) {
+	WideCharString(String value) {
 		this(value.length());
 		try {
 			write(value); }
@@ -45,7 +45,7 @@ public final class WideString extends PointerType implements NativeMapped {
 			throw new RuntimeException("should not happen", e); }
 	}
 	
-	WideString(Pointer p, int offset, int length) {
+	WideCharString(Pointer p, int offset, int length) {
 		this(length);
 		setPointer(p.share(offset * WideChar.SIZE));
 	}
@@ -128,7 +128,7 @@ public final class WideString extends PointerType implements NativeMapped {
 	 * @return This object
 	 * @throws IOException if the supplied value is longer than the available space
 	 */
-	WideString write(String value) throws IOException {
+	WideCharString write(String value) throws IOException {
 		return write(value, StandardDisplayTables.DEFAULT);
 	}
 	
@@ -140,11 +140,11 @@ public final class WideString extends PointerType implements NativeMapped {
 	 * @throws UnmappableCharacterException if the supplied value is not Unicode braille (contains characters outside of the 2800-28FF range)
 	 * @throws IOException if the supplied value is longer than the available space
 	 */
-	WideString writeDots(String value) throws UnmappableCharacterException, IOException {
+	WideCharString writeDots(String value) throws UnmappableCharacterException, IOException {
 		return write(value, StandardDisplayTables.UNICODE);
 	}
 	
-	private WideString write(String value, DisplayTable displayTable) throws UnmappableCharacterException, IOException {
+	private WideCharString write(String value, DisplayTable displayTable) throws UnmappableCharacterException, IOException {
 		Charset charset = displayTable.asCharset();
 		if (encoders == null)
 			encoders = new IdentityHashMap<Charset,CharsetEncoder>();
@@ -159,7 +159,7 @@ public final class WideString extends PointerType implements NativeMapped {
 	}
 	
 	// using CharsetEncoder because behavior of String.getBytes() is undefined when characters can not be encoded
-	private WideString write(String value, CharsetEncoder encoder) throws UnmappableCharacterException, IOException {
+	private WideCharString write(String value, CharsetEncoder encoder) throws UnmappableCharacterException, IOException {
 		synchronized (encoder) {
 			// We are sure that the following condition is always met because the write(String,
 			// DisplayTable) method is private.
@@ -209,14 +209,14 @@ public final class WideString extends PointerType implements NativeMapped {
 		return length;
 	}
 	
-	WideString substring(int beginIndex) {
+	WideCharString substring(int beginIndex) {
 		return substring(beginIndex, length);
 	}
 	
-	WideString substring(int beginIndex, int endIndex) {
+	WideCharString substring(int beginIndex, int endIndex) {
 		if (beginIndex < 0 || endIndex > length || beginIndex > endIndex)
 			throw new IndexOutOfBoundsException();
-		return new WideString(getPointer(), beginIndex, endIndex - beginIndex);
+		return new WideCharString(getPointer(), beginIndex, endIndex - beginIndex);
 	}
 	
 	@Override

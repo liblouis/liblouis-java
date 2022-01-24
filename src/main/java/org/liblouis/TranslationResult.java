@@ -11,7 +11,7 @@ public class TranslationResult {
 	private int[] characterAttributes = null;
 	private int[] interCharacterAttributes = null;
 	
-	TranslationResult(WideString outbuf, IntByReference outlen, int[] inputPos,
+	TranslationResult(WideCharString outbuf, IntByReference outlen, int[] inputPos,
 	                  int[] characterAttributes, int[] interCharacterAttributes,
 	                  DisplayTable displayTable) throws DisplayException {
 		int len = outlen.getValue();
