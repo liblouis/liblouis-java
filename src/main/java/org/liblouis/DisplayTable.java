@@ -352,6 +352,11 @@ public interface DisplayTable {
 		}
 
 		@Override
+		public String toString() {
+			return table;
+		}
+		
+		@Override
 		public IOMode getMode() {
 			return IOMode.DOTS_IO;
 		}
