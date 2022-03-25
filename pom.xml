@@ -38,7 +38,7 @@
       <dependency>
         <groupId>org.liblouis</groupId>
         <artifactId>louis</artifactId>
-        <version>3.19.0</version>
+        <version>3.21.0-p1</version>
         <type>nar</type>
       </dependency>
     </dependencies>
