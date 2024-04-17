@@ -8,9 +8,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -136,11 +138,22 @@ public class Louis {
 	private static Lou_LogCallback lou_logCallback = null;
 	private static boolean loggerIsRegistered = false;
 	
+	// capture errors so that Translator can include them in CompilationException or TranslationException
+	static List<String> errors = new ArrayList<>();
+	
 	public static synchronized void setLogger(final Logger logger) {
 		logCallback = logger;
 		lou_logCallback = new Lou_LogCallback() {
 			public void invoke(int level, String message) {
-				logger.log(Logger.Level.from(level), message);
+				Logger.Level lvl = Logger.Level.from(level);
+				switch (lvl) {
+				case ERROR:
+				case FATAL:
+					errors.add(message);
+					break;
+				}
+				if (logger != null)
+					logger.log(lvl, message);
 			}
 		};
 		loggerIsRegistered = false;
