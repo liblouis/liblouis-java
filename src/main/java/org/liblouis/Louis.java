@@ -131,6 +131,7 @@ public class Louis {
 		tableResolverIsRegistered = false;
 	}
 	
+	private static Logger.Level logLevel = Logger.Level.INFO;
 	private static Logger logCallback = null;
 	private static Lou_LogCallback lou_logCallback = null;
 	private static boolean loggerIsRegistered = false;
@@ -145,22 +146,16 @@ public class Louis {
 		loggerIsRegistered = false;
 	}
 	
-	public static void setLogLevel(Logger.Level level) {
+	public static synchronized void setLogLevel(Logger.Level level) {
+		logLevel = level;
 		getLibrary().lou_setLogLevel(level.value());
 	}
 	
 	static void log(Logger.Level level, String format, Object... args) {
 		Slf4jLogger.INSTANCE.log(level, format, args);
 		LouisLibrary lib = getLibrary();
-		if (logCallback != null && !(logCallback instanceof Slf4jLogger))
-			if (args.length > 0) {
-				String[] message = new String[1 + args.length];
-				message[0] = format;
-				for (int i = 0; i < args.length; i++)
-					message[1 + i] = args[i].toString();
-				lib._lou_logMessage(level.value(), message);
-			} else
-				lib._lou_logMessage(level.value(), format);
+		if (logCallback != null && !(logCallback instanceof Slf4jLogger) && level.above(logLevel))
+			logCallback.log(level, String.format(format, args));
 	}
 	
 	/**
@@ -298,7 +293,7 @@ public class Louis {
 		
 		public String[] lou_listTables();
 		
-		public void _lou_logMessage(int level, String... format);
+		//public void _lou_logMessage(int level, String... format);
 		
 		public String[] lou_getEmphClasses(String tableList);
 		
