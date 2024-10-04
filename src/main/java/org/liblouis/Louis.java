@@ -223,7 +223,8 @@ public class Louis {
 			}
 			try {
 				String name = (libraryPath != null) ? libraryPath.getCanonicalPath() : "louis";
-				LouisLibrary unsynced = (LouisLibrary)Native.loadLibrary(name, LouisLibrary.class);
+				//LouisLibrary unsynced = (LouisLibrary)Native.loadLibrary(name, LouisLibrary.class);
+				LouisLibrary unsynced = (LouisLibrary)Native.load(name, LouisLibrary.class);
 				INSTANCE = (LouisLibrary)Native.synchronizedLibrary(unsynced);
 				logger.debug("Loaded " + name + ": Liblouis v" + INSTANCE.lou_version() + " (UCS" + INSTANCE.lou_charSize() + ")");
 			} catch (IOException e) {

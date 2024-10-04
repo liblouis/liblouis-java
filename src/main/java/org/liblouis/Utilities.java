@@ -82,10 +82,12 @@ public class Utilities {
 		switch (Platform.getOSType()) {
 			case Platform.MAC:
 			case Platform.LINUX:
-				libc = Native.loadLibrary("c", UnixCLibrary.class);
+				//libc = Native.loadLibrary("c", UnixCLibrary.class);
+				libc = Native.load("c", UnixCLibrary.class);
 				break;
 			case Platform.WINDOWS:
-				libc = Native.loadLibrary("msvcrt", WindowsCLibrary.class);
+				//libc = Native.loadLibrary("msvcrt", WindowsCLibrary.class);
+				libc = Native.load("msvcrt", WindowsCLibrary.class);
 				break;
 		}
 	}

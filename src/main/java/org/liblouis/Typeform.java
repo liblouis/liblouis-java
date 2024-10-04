@@ -4,7 +4,12 @@ public final class Typeform {
 
 	public static final Typeform PLAIN_TEXT = new Typeform(null, (short)0);
 	public static final Typeform COMPUTER = new Typeform("computer", (short)0x0400);
-	
+
+	//For matching liblouis.h typeforms
+	public static final Typeform BOLD_TEXT = new Typeform("bold", (short)0x04);
+	public static final Typeform ITALIC_TEXT = new Typeform("italic", (short)0x01);
+	public static final Typeform UNDERLINED_TEXT = new Typeform("underline", (short)0x02);
+
 	private final String name;
 	
 	/**

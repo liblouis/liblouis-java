@@ -57,7 +57,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.1</version>
+      <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -71,9 +71,14 @@
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
+          <basedir/>
+          <buildDirectory/>
+          <outputDirectory/>
+          <projectArtifact/>
         </configuration>
       </plugin>
       <plugin>
@@ -207,12 +212,13 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.0</version>
         <configuration>
           <excludes>
             <!-- part of integration-test -->
             <exclude>org/liblouis/DefaultTablesTest.java</exclude>
           </excludes>
-          <forkMode>pertest</forkMode>
+          <!--<forkMode>pertest</forkMode>-->
           <systemPropertyVariables>
             <jna.nosys>true</jna.nosys>
             <org.slf4j.simpleLogger.logFile>System.out</org.slf4j.simpleLogger.logFile>
@@ -239,7 +245,7 @@
             </goals>
             <configuration>
               <classifier>resources</classifier>
-              <instructions combine.self="replace">
+              <instructions combine.self="override">
                 <Bundle-SymbolicName>org.liblouis.java.resources</Bundle-SymbolicName>
                 <Private-Package />
                 <Export-Package />
@@ -295,10 +301,11 @@
       <id>sonatype-oss-release</id>
       <build>
         <plugins>
+
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>2.1.2</version>
+            <version>4.0.0-beta-1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -311,7 +318,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.8.1</version>
+            <version>3.10.1</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
@@ -324,7 +331,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.2.7</version>
             <configuration>
               <useAgent>true</useAgent>
               <!-- Prevent gpg from using pinentry programs -->

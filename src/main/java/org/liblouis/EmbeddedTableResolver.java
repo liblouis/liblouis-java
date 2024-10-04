@@ -150,7 +150,7 @@ class EmbeddedTableResolver implements TableResolver {
 				final List<String> resources = new ArrayList<String>();
 				try {
 					walkFileTree(d, EnumSet.noneOf(FileVisitOption.class), 1, new SimpleFileVisitor<Path>() {
-							public FileVisitResult visitFile(Path f, BasicFileAttributes _) throws IOException {
+							public FileVisitResult visitFile(Path f, BasicFileAttributes attr) throws IOException {
 								resources.add(""+f.getFileName());
 								return FileVisitResult.CONTINUE; }}); }
 				catch (NoSuchFileException e) {
