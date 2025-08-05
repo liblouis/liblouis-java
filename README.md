@@ -15,7 +15,7 @@ Building
 Deploying
 --------
 
- * `mvn deploy -Psonatype-oss-release` will deploy to Sonatype OSS
+ * `mvn deploy -Psonatype-release` will deploy to Sonatype
  
 Authors
 -------
