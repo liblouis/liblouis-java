@@ -68,6 +68,9 @@ public class Louis {
 	
 	public static synchronized void setTableResolver(final TableResolver tableResolver) {
 		Louis.tableResolver = tableResolver;
+		generatedTableNames.clear();
+		tablesStoredToFile.clear();
+		tablesStoredToFileInv.clear();
 		lou_tableResolver = new Lou_TableResolver() {
 				public File[] invoke(String table, File base) {
 					File[] ret = _invoke(table, base);

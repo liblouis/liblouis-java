@@ -212,7 +212,8 @@
             <!-- part of integration-test -->
             <exclude>org/liblouis/DefaultTablesTest.java</exclude>
           </excludes>
-          <forkMode>pertest</forkMode>
+          <forkCount>1</forkCount>
+          <reuseForks>false</reuseForks>
           <systemPropertyVariables>
             <jna.nosys>true</jna.nosys>
             <org.slf4j.simpleLogger.logFile>System.out</org.slf4j.simpleLogger.logFile>
