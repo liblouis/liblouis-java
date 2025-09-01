@@ -167,8 +167,20 @@ public class Louis {
 	static void log(Logger.Level level, String format, Object... args) {
 		Slf4jLogger.INSTANCE.log(level, format, args);
 		LouisLibrary lib = getLibrary();
-		if (logCallback != null && !(logCallback instanceof Slf4jLogger) && level.above(logLevel))
-			logCallback.log(level, String.format(format, args));
+		if (logCallback != null && level.above(logLevel)) {
+			String message = String.format(format, args);
+			if (logCallback instanceof Slf4jLogger)
+				// already logged, but not captured yet
+				switch (level) {
+				case ERROR:
+				case FATAL:
+					errors.add(message);
+					break;
+				default:
+				}
+			else
+				logCallback.log(level, message);
+		}
 	}
 	
 	/**
