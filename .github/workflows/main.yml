@@ -40,3 +40,10 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+      - name: Publish Javadoc
+        env:
+          GH_REMOTE: "https://${{ secrets.PUBLISH_JAVADOC_GITHUB_TOKEN }}@github.com/liblouis/liblouis-java.git"
+          GH_USER_NAME: "Github CI"
+          GH_USER_EMAIL: "daisy@users.noreply.github.com"
+        run: |
+          ./publish-javadoc.sh
