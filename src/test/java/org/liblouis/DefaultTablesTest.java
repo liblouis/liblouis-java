@@ -21,7 +21,7 @@ public class DefaultTablesTest {
 		Set<String> locales = new HashSet<String>();
 		for (Table t : Louis.listTables())
 			locales.add(t.getInfo().get("language"));
-		assertEquals(114, locales.size());
+		assertEquals(116, locales.size());
 	}
 	
 	@Test
@@ -31,6 +31,6 @@ public class DefaultTablesTest {
 			t.getTranslator();
 			count++;
 		}
-		assertEquals(218, count);
+		assertEquals(233, count);
 	}
 }

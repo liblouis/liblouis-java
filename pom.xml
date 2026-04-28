@@ -38,7 +38,7 @@
       <dependency>
         <groupId>org.liblouis</groupId>
         <artifactId>louis</artifactId>
-        <version>3.30.0-p1</version>
+        <version>3.36.0-p1</version>
         <type>nar</type>
       </dependency>
     </dependencies>
@@ -115,7 +115,7 @@
                 <artifactItem>
                   <groupId>org.liblouis</groupId>
                   <artifactId>louis</artifactId>
-                  <classifier>x86_64-MacOSX-gpp-shared</classifier>
+                  <classifier>aarch64-Linux-gpp-shared</classifier>
                   <type>nar</type>
                 </artifactItem>
                 <artifactItem>
@@ -159,7 +159,7 @@
             <configuration>
               <resources>
                 <resource>
-                  <directory>target/dependency/lib/x86_64-MacOSX-gpp/shared</directory>
+                  <directory>target/dependency/lib/aarch64-MacOSX-gpp/shared</directory>
                   <includes>
                     <include>liblouis.dylib</include>
                   </includes>
@@ -185,6 +185,13 @@
                     <include>liblouis.so</include>
                   </includes>
                   <targetPath>linux-x86-64</targetPath>
+                </resource>
+                <resource>
+                  <directory>target/dependency/lib/aarch64-Linux-gpp/shared</directory>
+                  <includes>
+                    <include>liblouis.so</include>
+                  </includes>
+                  <targetPath>linux-aarch64</targetPath>
                 </resource>
                 <resource>
                   <directory>target/dependency/bin/i686-w64-mingw32-gpp</directory>
@@ -246,10 +253,11 @@
                 <Export-Package />
                 <Include-Resource>
                   org/liblouis/resource-files/tables=target/dependency/share/liblouis/tables,
-                  darwin-x86-64/liblouis.dylib=target/dependency/lib/x86_64-MacOSX-gpp/shared/liblouis.dylib,
+                  darwin-x86-64/liblouis.dylib=target/dependency/lib/aarch64-MacOSX-gpp/shared/liblouis.dylib,
                   darwin-aarch64/liblouis.dylib=target/dependency/lib/aarch64-MacOSX-gpp/shared/liblouis.dylib,
                   linux-x86/liblouis.so=target/dependency/lib/i386-Linux-gpp/shared/liblouis.so,
                   linux-x86-64/liblouis.so=target/dependency/lib/amd64-Linux-gpp/shared/liblouis.so,
+                  linux-aarch64/liblouis.so=target/dependency/lib/aarch64-Linux-gpp/shared/liblouis.so,
                   win32-x86/liblouis.dll=target/dependency/bin/i686-w64-mingw32-gpp/liblouis.dll,
                   win32-x86-64/liblouis.dll=target/dependency/bin/x86_64-w64-mingw32-gpp/liblouis.dll
                 </Include-Resource>
